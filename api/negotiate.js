@@ -1,4 +1,4 @@
-// Buyer bot configuration — tweak these to change the bot's goals and limits
+// Buyer bot configuration — tweak these to change the bot's goals and limits.
 const BOT_CONFIG = {
   price:          { ideal: 100, limit: 135, weight: 0.40 }, // buyer wants lower price
   paymentTerms:   { ideal: 90,  limit: 30,  weight: 0.25 }, // buyer wants more days to pay (Net 90)
