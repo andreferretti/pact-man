@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.469.0/font/lucide.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pact-Man</title>
   <style>
@@ -221,7 +222,7 @@
       <h1>Pact-Man — Series A Negotiation</h1>
       <p>You are the <strong>VC investor</strong>. Negotiate term sheet with the founder.</p>
     </div>
-    <div class="round-badge" id="roundBadge">Round 1 / 6</div>
+    <div class="round-badge" id="roundBadge" style="display:none">Round 1 / 6</div>
   </header>
 
   <div class="chat" id="chat"></div>
@@ -265,9 +266,9 @@
   let ended = false;
 
   const BOT_INTRO =
-    'Hey — thanks for taking the meeting. We\'re raising a Series A and I\'m excited about what we\'re building.\n\n' +
+    'Hey! We\'re raising a Series A for our space tech startup and I couldn\'t be more fired up about the mission.\n\n' +
     'Here\'s where I\'d love to land: ~$50M pre-money valuation, 10-15% equity, 1 board seat for you, and a clean 1x liquidation preference.\n\n' +
-    'I know we\'ll need to find middle ground. Send over your opening term sheet.';
+    'We\'ve got two payload contracts signed, a launch window in 18 months, and a team of ex-NASA engineers. Send over your opening term sheet — let\'s see if we can get this rocket funded.';
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -279,7 +280,7 @@
 
     const avatar = document.createElement('div');
     avatar.className = 'avatar';
-    avatar.textContent = role === 'bot' ? 'F' : 'VC';
+    avatar.innerHTML = role === 'bot' ? '<i class="icon-rocket"></i>' : '<i class="icon-banknote"></i>';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
@@ -313,7 +314,7 @@
     wrapper.className = 'message bot';
     wrapper.id = 'typing';
     wrapper.innerHTML =
-      '<div class="avatar" style="font-size:15px">F</div>' +
+      '<div class="avatar"><i class="icon-rocket"></i></div>' +
       '<div class="bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
     chat.appendChild(wrapper);
     chat.scrollTop = chat.scrollHeight;

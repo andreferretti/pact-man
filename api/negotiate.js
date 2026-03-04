@@ -51,23 +51,23 @@ function generateCounter(offer, round) {
 }
 
 const COUNTER_INTROS = [
-  "Appreciate the term sheet. I think the vision here is worth more — let me show you where I'm coming from.",
-  "Thanks for coming back to the table. I can move on some things, but I need to protect the cap table.",
-  "We're getting closer. I'm flexible on structure, but the valuation needs to reflect our traction.",
-  "I like the direction. Let me push back gently on a couple of points.",
-  "We're almost there. Here's what I can realistically commit to and still keep my team motivated.",
-  "Last round — let's make this work. Here's my final position.",
+  "Appreciate the term sheet. We're building orbital infrastructure here — the upside is literally astronomical. Let me show you where I'm coming from.",
+  "Thanks for coming back to the table. I can move on some things, but I need to protect the cap table — our launch window is tight and the team needs skin in the game.",
+  "We're getting closer to alignment. I'm flexible on structure, but the valuation needs to reflect our payload contracts and launch cadence.",
+  "I like the trajectory. Let me push back gently on a couple of points — space is hard, but the TAM is infinite.",
+  "We're almost in orbit. Here's what I can realistically commit to and still keep my engineers from defecting to SpaceX.",
+  "T-minus final offer. Let's close this and start fueling the rocket.",
 ];
 
 function buildMessage(status, offer, counter, round) {
   if (status === 'accepted') {
-    return `We have a deal! I'm happy to accept: $${offer.valuation}M valuation, ${offer.equity}% equity, ${offer.boardSeats} board seat${offer.boardSeats !== 1 ? 's' : ''}, ${offer.liquidationPref}x liquidation preference. Let's build something great together.`;
+    return `We have a deal! Houston, we have liftoff: $${offer.valuation}M valuation, ${offer.equity}% equity, ${offer.boardSeats} board seat${offer.boardSeats !== 1 ? 's' : ''}, ${offer.liquidationPref}x liquidation preference. Welcome aboard — let's go to orbit.`;
   }
   if (status === 'rejected') {
     if (round > MAX_ROUNDS) {
-      return `We've gone back and forth but can't find alignment. I'll need to explore other investors. Thanks for your time.`;
+      return `We've been orbiting this deal too long without docking. I'll need to explore other launch partners. Thanks for your time — clear skies.`;
     }
-    return `These terms don't work for us — the dilution is too aggressive and the structure is too punitive. I'll have to pass on this round.`;
+    return `These terms would ground us before we even reach altitude — the dilution is too aggressive and the structure is too punitive. Mission abort on this round.`;
   }
   return COUNTER_INTROS[Math.min(round - 1, COUNTER_INTROS.length - 1)];
 }
