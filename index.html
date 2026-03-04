@@ -235,8 +235,8 @@
         <input type="number" id="valuation" min="1" step="1" placeholder="e.g. 25" />
       </div>
       <div class="field">
-        <label>Equity <span class="hint">(% for your fund)</span></label>
-        <input type="number" id="equity" min="1" max="100" step="1" placeholder="e.g. 20" />
+        <label>Investment <span class="hint">($M from your fund)</span></label>
+        <input type="number" id="investment" min="1" step="1" placeholder="e.g. 10" />
       </div>
       <div class="field">
         <label>Board seats <span class="hint">(for your fund)</span></label>
@@ -267,7 +267,7 @@
 
   const BOT_INTRO =
     'Hey! We\'re raising a Series A for our space tech startup and I couldn\'t be more fired up about the mission.\n\n' +
-    'Here\'s where I\'d love to land: ~$50M pre-money valuation, 10-15% equity, 1 board seat for you, and a clean 1x liquidation preference.\n\n' +
+    'Here\'s where I\'d love to land: ~$50M pre-money valuation, $5-8M investment, 1 board seat for you, and a clean 1x liquidation preference.\n\n' +
     'We\'ve got two payload contracts signed, a launch window in 18 months, and a team of ex-NASA engineers. Send over your opening term sheet — let\'s see if we can get this rocket funded.';
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -295,7 +295,7 @@
       pill.className = 'offer-pill';
       pill.innerHTML =
         `<span>$${offerData.valuation}M</span>` +
-        `<span>${offerData.equity}% equity</span>` +
+        `<span>$${offerData.investment}M</span>` +
         `<span>${offerData.boardSeats} seat${offerData.boardSeats !== 1 ? 's' : ''}</span>` +
         `<span>${offerData.liquidationPref}x liq pref</span>`;
       bubble.appendChild(pill);
@@ -336,7 +336,7 @@
 
   function fillForm(offer) {
     document.getElementById('valuation').value       = offer.valuation;
-    document.getElementById('equity').value           = offer.equity;
+    document.getElementById('investment').value        = offer.investment;
     document.getElementById('boardSeats').value       = offer.boardSeats;
     document.getElementById('liquidationPref').value  = offer.liquidationPref;
   }
@@ -344,14 +344,14 @@
   function readForm() {
     return {
       valuation:       parseFloat(document.getElementById('valuation').value),
-      equity:          parseFloat(document.getElementById('equity').value),
+      investment:      parseFloat(document.getElementById('investment').value),
       boardSeats:      parseFloat(document.getElementById('boardSeats').value),
       liquidationPref: parseFloat(document.getElementById('liquidationPref').value),
     };
   }
 
   function setFormDisabled(disabled) {
-    ['valuation', 'equity', 'boardSeats', 'liquidationPref'].forEach(id => {
+    ['valuation', 'investment', 'boardSeats', 'liquidationPref'].forEach(id => {
       document.getElementById(id).disabled = disabled;
     });
   }
@@ -432,7 +432,7 @@
     document.getElementById('acceptBtn').style.display = 'none';
     document.getElementById('resetBtn').style.display  = 'none';
     setFormDisabled(false);
-    fillForm({ valuation: '', equity: '', boardSeats: '', liquidationPref: '' });
+    fillForm({ valuation: '', investment: '', boardSeats: '', liquidationPref: '' });
 
     addMessage('bot', BOT_INTRO);
   }

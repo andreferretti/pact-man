@@ -2,7 +2,7 @@
 // The bot plays the FOUNDER seeking investment. The human plays the VC.
 const BOT_CONFIG = {
   valuation:      { ideal: 50,  limit: 15,  weight: 0.30 }, // founder wants higher valuation ($M)
-  equity:         { ideal: 10,  limit: 35,  weight: 0.35 }, // founder wants to give away less equity (%)
+  investment:     { ideal: 5,   limit: 20,  weight: 0.35 }, // founder wants less investment to minimize dilution ($M)
   boardSeats:     { ideal: 1,   limit: 3,   weight: 0.15 }, // founder wants fewer VC board seats
   liquidationPref:{ ideal: 1.0, limit: 2.5, weight: 0.20 }, // founder wants lower liquidation preference (x)
 };
@@ -22,8 +22,8 @@ function scoreOffer(offer) {
   const scores = {
     // Valuation: higher is better for founder
     valuation:       clamp((offer.valuation - c.valuation.limit) / (c.valuation.ideal - c.valuation.limit)),
-    // Equity: lower is better for founder
-    equity:          clamp((c.equity.limit - offer.equity) / (c.equity.limit - c.equity.ideal)),
+    // Investment: lower is better for founder (less dilution)
+    investment:      clamp((c.investment.limit - offer.investment) / (c.investment.limit - c.investment.ideal)),
     // Board seats: fewer is better for founder
     boardSeats:      clamp((c.boardSeats.limit - offer.boardSeats) / (c.boardSeats.limit - c.boardSeats.ideal)),
     // Liquidation preference: lower is better for founder
@@ -31,7 +31,7 @@ function scoreOffer(offer) {
   };
   const utility =
     scores.valuation       * c.valuation.weight +
-    scores.equity          * c.equity.weight +
+    scores.investment      * c.investment.weight +
     scores.boardSeats      * c.boardSeats.weight +
     scores.liquidationPref * c.liquidationPref.weight;
   return { utility, scores };
@@ -44,7 +44,7 @@ function generateCounter(offer, round) {
   const factor = Math.min(0.78, round * 0.13);
   return {
     valuation:       Math.round(Math.max(c.valuation.limit,       c.valuation.ideal       + (offer.valuation       - c.valuation.ideal)       * factor)),
-    equity:          Math.round(Math.min(c.equity.limit,           c.equity.ideal          + (offer.equity          - c.equity.ideal)          * factor)),
+    investment:      Math.round(Math.min(c.investment.limit,       c.investment.ideal      + (offer.investment      - c.investment.ideal)      * factor)),
     boardSeats:      Math.round(Math.min(c.boardSeats.limit,       c.boardSeats.ideal      + (offer.boardSeats      - c.boardSeats.ideal)      * factor)),
     liquidationPref: +(Math.min(c.liquidationPref.limit, c.liquidationPref.ideal + (offer.liquidationPref - c.liquidationPref.ideal) * factor)).toFixed(1),
   };
@@ -61,7 +61,7 @@ const COUNTER_INTROS = [
 
 function buildMessage(status, offer, counter, round) {
   if (status === 'accepted') {
-    return `We have a deal! Houston, we have liftoff: $${offer.valuation}M valuation, ${offer.equity}% equity, ${offer.boardSeats} board seat${offer.boardSeats !== 1 ? 's' : ''}, ${offer.liquidationPref}x liquidation preference. Welcome aboard — let's go to orbit.`;
+    return `We have a deal! Houston, we have liftoff: $${offer.valuation}M valuation, $${offer.investment}M investment, ${offer.boardSeats} board seat${offer.boardSeats !== 1 ? 's' : ''}, ${offer.liquidationPref}x liquidation preference. Welcome aboard — let's go to orbit.`;
   }
   if (status === 'rejected') {
     if (round > MAX_ROUNDS) {
@@ -83,8 +83,8 @@ module.exports = function handler(req, res) {
     return res.status(400).json({ error: 'Missing offer' });
   }
 
-  const { valuation, equity, boardSeats, liquidationPref } = offer;
-  if ([valuation, equity, boardSeats, liquidationPref].some(v => typeof v !== 'number' || v <= 0)) {
+  const { valuation, investment, boardSeats, liquidationPref } = offer;
+  if ([valuation, investment, boardSeats, liquidationPref].some(v => typeof v !== 'number' || v <= 0)) {
     return res.status(400).json({ error: 'Invalid offer values — all must be positive numbers' });
   }
 
