@@ -19,7 +19,7 @@
 
     /* ── Header ── */
     header {
-      background: linear-gradient(135deg, #0b2e3d, #092430);
+      background: #092430;
       color: white;
       padding: 22px 24px;
       display: flex;
@@ -47,7 +47,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      background: #071e28;
+      background: #ffffff;
     }
 
     .message {
@@ -77,15 +77,16 @@
       line-height: 1.55;
     }
     .message.bot .bubble {
-      background: #0d2f3e;
-      border: 1px solid rgba(125,151,165,0.15);
-      border-bottom-left-radius: 4px;
-      color: #e8eff2;
+      background: #f5f5f5;
+      border-left: 3px solid #d0d0d0;
+      border-radius: 4px;
+      color: #333333;
     }
     .message.user .bubble {
-      background: #7D97A5;
-      color: white;
-      border-bottom-right-radius: 4px;
+      background: #e8f0f4;
+      border-left: 3px solid #7D97A5;
+      border-radius: 4px;
+      color: #333333;
     }
 
     /* Offer pill inside a bubble */
@@ -100,10 +101,10 @@
       font-weight: 500;
       padding: 2px 8px;
       border-radius: 10px;
-      background: rgba(255,255,255,0.08);
-      color: #7D97A5;
+      background: rgba(0,0,0,0.06);
+      color: #555555;
     }
-    .message.user .offer-pill span { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); }
+    .message.user .offer-pill span { background: rgba(0,0,0,0.06); color: #555555; }
 
     /* Typing indicator */
     .typing-dot {
@@ -187,33 +188,6 @@
     .btn-secondary:not(:disabled):hover { background: rgba(125,151,165,0.25); }
     .btn-reset { background: none; color: #7D97A5; font-size: 15px; padding: 10px 12px; }
     .btn-reset:hover { color: #c0cdd4; }
-
-    /* ── Status bar ── */
-    .status-bar {
-      border-top: 1px solid rgba(125,151,165,0.15);
-      padding: 10px 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      color: #7D97A5;
-      background: #0b2e3d;
-    }
-    .score-bar-wrap {
-      flex: 1;
-      height: 6px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .score-bar {
-      height: 100%;
-      border-radius: 3px;
-      width: 0%;
-      transition: width 0.4s, background 0.4s;
-      background: #555;
-    }
-    .score-label { font-weight: 600; min-width: 38px; text-align: right; }
   </style>
 </head>
 <body>
@@ -232,19 +206,19 @@
     <div class="fields">
       <div class="field">
         <label>Valuation <span class="hint">($M pre-money)</span></label>
-        <input type="number" id="valuation" min="1" step="1" placeholder="e.g. 25" />
+        <input type="number" id="valuation" min="1" step="1" />
       </div>
       <div class="field">
         <label>Investment <span class="hint">($M from your fund)</span></label>
-        <input type="number" id="investment" min="1" step="1" placeholder="e.g. 10" />
+        <input type="number" id="investment" min="1" step="1" />
       </div>
       <div class="field">
         <label>Board seats <span class="hint">(for your fund)</span></label>
-        <input type="number" id="boardSeats" min="0" step="1" placeholder="e.g. 2" />
+        <input type="number" id="boardSeats" min="0" step="1" />
       </div>
       <div class="field">
         <label>Liquidation pref <span class="hint">(x multiple)</span></label>
-        <input type="number" id="liquidationPref" min="0.5" step="0.1" placeholder="e.g. 1.5" />
+        <input type="number" id="liquidationPref" min="0.5" step="0.1" />
       </div>
     </div>
     <div class="actions">
@@ -254,11 +228,6 @@
     </div>
   </div>
 
-  <div class="status-bar">
-    <span>Founder satisfaction</span>
-    <div class="score-bar-wrap"><div class="score-bar" id="scoreBar"></div></div>
-    <span class="score-label" id="scoreLabel">—</span>
-  </div>
 
 <script>
   let round = 0;
@@ -280,7 +249,7 @@
 
     const avatar = document.createElement('div');
     avatar.className = 'avatar';
-    avatar.innerHTML = role === 'bot' ? '<i class="icon-rocket"></i>' : '<i class="icon-banknote"></i>';
+    avatar.innerHTML = role === 'bot' ? '<i class="icon-rocket"></i>' : '';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
@@ -301,7 +270,7 @@
       bubble.appendChild(pill);
     }
 
-    wrapper.appendChild(avatar);
+    if (role === 'bot') wrapper.appendChild(avatar);
     wrapper.appendChild(bubble);
     chat.appendChild(wrapper);
     chat.scrollTop = chat.scrollHeight;
@@ -325,14 +294,6 @@
     if (el) el.remove();
   }
 
-  function updateScore(utility) {
-    const bar   = document.getElementById('scoreBar');
-    const label = document.getElementById('scoreLabel');
-    bar.style.width      = utility + '%';
-    bar.style.background = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#D09047';
-    label.textContent    = utility + '%';
-    label.style.color    = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#D09047';
-  }
 
   function fillForm(offer) {
     document.getElementById('valuation').value       = offer.valuation;
@@ -383,7 +344,6 @@
       });
       const data = await res.json();
       hideTyping();
-      updateScore(data.utility);
 
       if (data.status === 'accepted') {
         addMessage('bot', data.message);
@@ -426,8 +386,6 @@
 
     document.getElementById('chat').innerHTML       = '';
     document.getElementById('roundBadge').textContent = 'Round 1 / 6';
-    document.getElementById('scoreBar').style.width  = '0%';
-    document.getElementById('scoreLabel').textContent = '—';
     document.getElementById('submitBtn').disabled   = false;
     document.getElementById('acceptBtn').style.display = 'none';
     document.getElementById('resetBtn').style.display  = 'none';
