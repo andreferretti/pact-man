@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pact-Man</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #eef2f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 680px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1a237e;
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    header h1 { font-size: 18px; font-weight: 600; margin-bottom: 3px; }
+    header p  { font-size: 13px; opacity: 0.75; }
+    .round-badge {
+      background: rgba(255,255,255,0.18);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    /* ── Chat ── */
+    .chat {
+      padding: 20px;
+      min-height: 320px;
+      max-height: 420px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: #fafbfc;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      max-width: 88%;
+    }
+    .message.bot  { align-self: flex-start; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      background: #e8eaf6;
+    }
+    .message.user .avatar { background: #e8f5e9; }
+
+    .bubble {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .message.bot  .bubble {
+      background: #f0f1f5;
+      border-bottom-left-radius: 4px;
+      color: #1a1a2e;
+    }
+    .message.user .bubble {
+      background: #1a237e;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Offer pill inside a bubble */
+    .offer-pill {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+    .offer-pill span {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.07);
+    }
+    .message.user .offer-pill span { background: rgba(255,255,255,0.2); }
+
+    /* Typing indicator */
+    .typing-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #888;
+      margin: 0 2px;
+      animation: blink 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40%           { opacity: 1;   transform: scale(1); }
+    }
+
+    /* ── Form ── */
+    .form-area {
+      border-top: 1px solid #e9ecef;
+      padding: 20px 24px;
+      background: white;
+    }
+    .form-area h3 {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 14px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 5px;
+    }
+    .field .hint {
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 400;
+      margin-left: 3px;
+    }
+    .field input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      color: #1a1a2e;
+      transition: border-color 0.15s;
+    }
+    .field input:focus  { outline: none; border-color: #1a237e; }
+    .field input:disabled { background: #f7f8fa; color: #aaa; }
+
+    .actions { display: flex; gap: 10px; }
+
+    button {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, background 0.15s;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary   { background: #1a237e; color: white; }
+    .btn-primary:not(:disabled):hover { background: #283593; }
+    .btn-secondary { background: #e9ecef; color: #333; }
+    .btn-secondary:not(:disabled):hover { background: #dee2e6; }
+    .btn-reset { background: none; color: #888; font-size: 13px; padding: 10px 12px; }
+    .btn-reset:hover { color: #333; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      border-top: 1px solid #e9ecef;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #888;
+      background: #fafbfc;
+    }
+    .score-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: #e9ecef;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .score-bar {
+      height: 100%;
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.4s, background 0.4s;
+      background: #aaa;
+    }
+    .score-label { font-weight: 600; min-width: 38px; text-align: right; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Negotiation Agent</h1>
+      <p>You are the <strong>Supplier</strong>. Negotiate with the automated Buyer Agent.</p>
+    </div>
+    <div class="round-badge" id="roundBadge">Round 1 / 6</div>
+  </header>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="form-area" id="formArea">
+    <h3>Your Offer</h3>
+    <div class="fields">
+      <div class="field">
+        <label>Price per unit <span class="hint">($)</span></label>
+        <input type="number" id="price" min="1" step="1" placeholder="e.g. 130" />
+      </div>
+      <div class="field">
+        <label>Payment terms <span class="hint">(days, e.g. 30 = Net 30)</span></label>
+        <input type="number" id="paymentTerms" min="1" step="1" placeholder="e.g. 30" />
+      </div>
+      <div class="field">
+        <label>Delivery time <span class="hint">(days)</span></label>
+        <input type="number" id="deliveryDays" min="1" step="1" placeholder="e.g. 14" />
+      </div>
+      <div class="field">
+        <label>Contract length <span class="hint">(months)</span></label>
+        <input type="number" id="contractMonths" min="1" step="1" placeholder="e.g. 12" />
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary"   id="submitBtn"  onclick="submitOffer()">Submit Offer</button>
+      <button class="btn-secondary" id="acceptBtn"  onclick="acceptCounter()" style="display:none">Accept Bot's Counter</button>
+      <button class="btn-reset"     id="resetBtn"   onclick="resetGame()"    style="display:none">Start over</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span>Buyer satisfaction</span>
+    <div class="score-bar-wrap"><div class="score-bar" id="scoreBar"></div></div>
+    <span class="score-label" id="scoreLabel">—</span>
+  </div>
+</div>
+
+<script>
+  let round = 0;
+  let lastCounter = null;
+  let ended = false;
+
+  const BOT_INTRO =
+    'Hi! I\'m an automated buyer agent. I\'m looking to purchase goods and want to find terms that work for both sides.\n\n' +
+    'My opening position: price ~$100/unit, Net 60+ payment, delivery within 10 days, contract under 6 months.\n\n' +
+    'Please submit your opening offer.';
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  function addMessage(role, text, offerData) {
+    const chat = document.getElementById('chat');
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `message ${role}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = role === 'bot' ? '🤖' : '🏭';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    // Preserve line breaks in bot intro
+    text.split('\n').forEach((line, i) => {
+      if (i > 0) bubble.appendChild(document.createElement('br'));
+      bubble.appendChild(document.createTextNode(line));
+    });
+
+    if (offerData) {
+      const pill = document.createElement('div');
+      pill.className = 'offer-pill';
+      pill.innerHTML =
+        `<span>$${offerData.price}</span>` +
+        `<span>Net ${offerData.paymentTerms}</span>` +
+        `<span>${offerData.deliveryDays}d delivery</span>` +
+        `<span>${offerData.contractMonths}mo contract</span>`;
+      bubble.appendChild(pill);
+    }
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    chat.appendChild(wrapper);
+    chat.scrollTop = chat.scrollHeight;
+    return wrapper;
+  }
+
+  function showTyping() {
+    const chat = document.getElementById('chat');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message bot';
+    wrapper.id = 'typing';
+    wrapper.innerHTML =
+      '<div class="avatar">🤖</div>' +
+      '<div class="bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+    chat.appendChild(wrapper);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typing');
+    if (el) el.remove();
+  }
+
+  function updateScore(utility) {
+    const bar   = document.getElementById('scoreBar');
+    const label = document.getElementById('scoreLabel');
+    bar.style.width      = utility + '%';
+    bar.style.background = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#dc2626';
+    label.textContent    = utility + '%';
+    label.style.color    = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#dc2626';
+  }
+
+  function fillForm(offer) {
+    document.getElementById('price').value         = offer.price;
+    document.getElementById('paymentTerms').value  = offer.paymentTerms;
+    document.getElementById('deliveryDays').value  = offer.deliveryDays;
+    document.getElementById('contractMonths').value = offer.contractMonths;
+  }
+
+  function readForm() {
+    return {
+      price:          parseFloat(document.getElementById('price').value),
+      paymentTerms:   parseFloat(document.getElementById('paymentTerms').value),
+      deliveryDays:   parseFloat(document.getElementById('deliveryDays').value),
+      contractMonths: parseFloat(document.getElementById('contractMonths').value),
+    };
+  }
+
+  function setFormDisabled(disabled) {
+    ['price', 'paymentTerms', 'deliveryDays', 'contractMonths'].forEach(id => {
+      document.getElementById(id).disabled = disabled;
+    });
+  }
+
+  // ── Game flow ─────────────────────────────────────────────────────────────
+
+  async function submitOffer() {
+    if (ended) return;
+
+    const offer = readForm();
+    if (Object.values(offer).some(v => isNaN(v) || v <= 0)) {
+      alert('Please fill in all four fields with positive numbers.');
+      return;
+    }
+
+    round++;
+    document.getElementById('roundBadge').textContent = `Round ${round} / 6`;
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('acceptBtn').style.display = 'none';
+
+    addMessage('user', 'My offer:', offer);
+    showTyping();
+
+    try {
+      const res  = await fetch('/api/negotiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offer, round }),
+      });
+      const data = await res.json();
+      hideTyping();
+      updateScore(data.utility);
+
+      if (data.status === 'accepted') {
+        addMessage('bot', data.message);
+        endGame('accepted');
+      } else if (data.status === 'rejected') {
+        addMessage('bot', data.message);
+        endGame('rejected');
+      } else {
+        lastCounter = data.counter;
+        addMessage('bot', data.message, data.counter);
+        fillForm(data.counter);
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('acceptBtn').style.display = 'inline-block';
+      }
+    } catch (err) {
+      hideTyping();
+      addMessage('bot', 'Something went wrong. Please try again.');
+      document.getElementById('submitBtn').disabled = false;
+    }
+  }
+
+  function acceptCounter() {
+    if (!lastCounter || ended) return;
+    fillForm(lastCounter);
+    submitOffer();
+  }
+
+  function endGame(result) {
+    ended = true;
+    setFormDisabled(true);
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('acceptBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display  = 'inline-block';
+  }
+
+  function resetGame() {
+    round       = 0;
+    lastCounter = null;
+    ended       = false;
+
+    document.getElementById('chat').innerHTML       = '';
+    document.getElementById('roundBadge').textContent = 'Round 1 / 6';
+    document.getElementById('scoreBar').style.width  = '0%';
+    document.getElementById('scoreLabel').textContent = '—';
+    document.getElementById('submitBtn').disabled   = false;
+    document.getElementById('acceptBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display  = 'none';
+    setFormDisabled(false);
+    fillForm({ price: '', paymentTerms: '', deliveryDays: '', contractMonths: '' });
+
+    addMessage('bot', BOT_INTRO);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  addMessage('bot', BOT_INTRO);
+</script>
+</body>
+</html>
