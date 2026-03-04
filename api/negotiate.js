@@ -1,73 +1,75 @@
-// Buyer bot configuration — tweak these to change the bot's goals and limits.
+// Founder bot configuration — tweak these to change the bot's goals and limits.
+// The bot plays the FOUNDER seeking investment. The human plays the VC.
 const BOT_CONFIG = {
-  price:          { ideal: 100, limit: 135, weight: 0.40 }, // buyer wants lower price
-  paymentTerms:   { ideal: 90,  limit: 30,  weight: 0.25 }, // buyer wants more days to pay (Net 90)
-  deliveryDays:   { ideal: 7,   limit: 21,  weight: 0.20 }, // buyer wants faster delivery
-  contractMonths: { ideal: 3,   limit: 24,  weight: 0.15 }, // buyer wants shorter commitment
+  valuation:      { ideal: 50,  limit: 15,  weight: 0.30 }, // founder wants higher valuation ($M)
+  equity:         { ideal: 10,  limit: 35,  weight: 0.35 }, // founder wants to give away less equity (%)
+  boardSeats:     { ideal: 1,   limit: 3,   weight: 0.15 }, // founder wants fewer VC board seats
+  liquidationPref:{ ideal: 1.0, limit: 2.5, weight: 0.20 }, // founder wants lower liquidation preference (x)
 };
 
 const MAX_ROUNDS = 6;
 const ACCEPT_THRESHOLD = 0.72; // utility >= this → accept
 const REJECT_THRESHOLD = 0.28; // utility < this → walk away
 
-// Clamp a value to [0, 1]
 function clamp(val) {
   return Math.max(0, Math.min(1, val));
 }
 
-// Score an incoming supplier offer from the buyer's perspective.
-// Each term is normalized to [0,1] where 1 = buyer's ideal, 0 = buyer's limit.
-// Returns a weighted utility score in [0, 1].
+// Score an incoming VC offer from the founder's perspective.
+// Each term is normalized to [0,1] where 1 = founder's ideal, 0 = founder's limit.
 function scoreOffer(offer) {
   const c = BOT_CONFIG;
   const scores = {
-    price:        clamp((c.price.limit - offer.price) / (c.price.limit - c.price.ideal)),
-    paymentTerms:   clamp((offer.paymentTerms - c.paymentTerms.limit) / (c.paymentTerms.ideal - c.paymentTerms.limit)),
-    deliveryDays:   clamp((c.deliveryDays.limit - offer.deliveryDays) / (c.deliveryDays.limit - c.deliveryDays.ideal)),
-    contractMonths: clamp((c.contractMonths.limit - offer.contractMonths) / (c.contractMonths.limit - c.contractMonths.ideal)),
+    // Valuation: higher is better for founder
+    valuation:       clamp((offer.valuation - c.valuation.limit) / (c.valuation.ideal - c.valuation.limit)),
+    // Equity: lower is better for founder
+    equity:          clamp((c.equity.limit - offer.equity) / (c.equity.limit - c.equity.ideal)),
+    // Board seats: fewer is better for founder
+    boardSeats:      clamp((c.boardSeats.limit - offer.boardSeats) / (c.boardSeats.limit - c.boardSeats.ideal)),
+    // Liquidation preference: lower is better for founder
+    liquidationPref: clamp((c.liquidationPref.limit - offer.liquidationPref) / (c.liquidationPref.limit - c.liquidationPref.ideal)),
   };
   const utility =
-    scores.price          * c.price.weight +
-    scores.paymentTerms   * c.paymentTerms.weight +
-    scores.deliveryDays   * c.deliveryDays.weight +
-    scores.contractMonths * c.contractMonths.weight;
+    scores.valuation       * c.valuation.weight +
+    scores.equity          * c.equity.weight +
+    scores.boardSeats      * c.boardSeats.weight +
+    scores.liquidationPref * c.liquidationPref.weight;
   return { utility, scores };
 }
 
 // Generate a counteroffer. The bot starts near its ideal and concedes
-// toward the supplier's offer as rounds increase.
+// toward the VC's offer as rounds increase.
 function generateCounter(offer, round) {
   const c = BOT_CONFIG;
-  const factor = Math.min(0.78, round * 0.13); // concession grows each round, capped at 78%
+  const factor = Math.min(0.78, round * 0.13);
   return {
-    price:          Math.round(Math.min(c.price.limit,          c.price.ideal          + (offer.price          - c.price.ideal)          * factor)),
-    paymentTerms:   Math.round(Math.max(c.paymentTerms.limit,   c.paymentTerms.ideal   + (offer.paymentTerms   - c.paymentTerms.ideal)   * factor)),
-    deliveryDays:   Math.round(Math.min(c.deliveryDays.limit,   c.deliveryDays.ideal   + (offer.deliveryDays   - c.deliveryDays.ideal)   * factor)),
-    contractMonths: Math.round(Math.min(c.contractMonths.limit, c.contractMonths.ideal + (offer.contractMonths - c.contractMonths.ideal) * factor)),
+    valuation:       Math.round(Math.max(c.valuation.limit,       c.valuation.ideal       + (offer.valuation       - c.valuation.ideal)       * factor)),
+    equity:          Math.round(Math.min(c.equity.limit,           c.equity.ideal          + (offer.equity          - c.equity.ideal)          * factor)),
+    boardSeats:      Math.round(Math.min(c.boardSeats.limit,       c.boardSeats.ideal      + (offer.boardSeats      - c.boardSeats.ideal)      * factor)),
+    liquidationPref: +(Math.min(c.liquidationPref.limit, c.liquidationPref.ideal + (offer.liquidationPref - c.liquidationPref.ideal) * factor)).toFixed(1),
   };
 }
 
 const COUNTER_INTROS = [
-  "Thanks for the offer. I'm not quite there yet —",
-  "I appreciate you coming back. Still some ground to cover —",
-  "We're making progress, but I need to push on a few terms —",
-  "Getting closer. Let me show you where I can land —",
-  "We're running low on rounds. Here's my best realistic position —",
-  "Last chance to find a deal. Here's what I can genuinely commit to —",
+  "Appreciate the term sheet. I think the vision here is worth more — let me show you where I'm coming from.",
+  "Thanks for coming back to the table. I can move on some things, but I need to protect the cap table.",
+  "We're getting closer. I'm flexible on structure, but the valuation needs to reflect our traction.",
+  "I like the direction. Let me push back gently on a couple of points.",
+  "We're almost there. Here's what I can realistically commit to and still keep my team motivated.",
+  "Last round — let's make this work. Here's my final position.",
 ];
 
 function buildMessage(status, offer, counter, round) {
   if (status === 'accepted') {
-    return `We have a deal! I'm happy to accept these terms: $${offer.price}/unit, Net ${offer.paymentTerms}, ${offer.deliveryDays}-day delivery, ${offer.contractMonths}-month contract. Looking forward to working together.`;
+    return `We have a deal! I'm happy to accept: $${offer.valuation}M valuation, ${offer.equity}% equity, ${offer.boardSeats} board seat${offer.boardSeats !== 1 ? 's' : ''}, ${offer.liquidationPref}x liquidation preference. Let's build something great together.`;
   }
   if (status === 'rejected') {
     if (round > MAX_ROUNDS) {
-      return `We've used all our rounds and couldn't reach an agreement. I'll need to look at other suppliers. Thanks for your time.`;
+      return `We've gone back and forth but can't find alignment. I'll need to explore other investors. Thanks for your time.`;
     }
-    return `These terms don't work for us — the gap is too wide, especially on price and payment terms. I'll have to walk away.`;
+    return `These terms don't work for us — the dilution is too aggressive and the structure is too punitive. I'll have to pass on this round.`;
   }
-  const intro = COUNTER_INTROS[Math.min(round - 1, COUNTER_INTROS.length - 1)];
-  return intro;
+  return COUNTER_INTROS[Math.min(round - 1, COUNTER_INTROS.length - 1)];
 }
 
 module.exports = function handler(req, res) {
@@ -81,8 +83,8 @@ module.exports = function handler(req, res) {
     return res.status(400).json({ error: 'Missing offer' });
   }
 
-  const { price, paymentTerms, deliveryDays, contractMonths } = offer;
-  if ([price, paymentTerms, deliveryDays, contractMonths].some(v => typeof v !== 'number' || v <= 0)) {
+  const { valuation, equity, boardSeats, liquidationPref } = offer;
+  if ([valuation, equity, boardSeats, liquidationPref].some(v => typeof v !== 'number' || v <= 0)) {
     return res.status(400).json({ error: 'Invalid offer values — all must be positive numbers' });
   }
 

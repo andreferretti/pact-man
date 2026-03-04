@@ -9,7 +9,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #eef2f7;
+      background: #0f0f1a;
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -19,34 +19,36 @@
 
     .app {
       width: 100%;
-      max-width: 680px;
-      background: white;
+      max-width: 700px;
+      background: #1a1a2e;
       border-radius: 16px;
-      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      box-shadow: 0 8px 48px rgba(0,0,0,0.4);
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      border: 1px solid rgba(255,255,255,0.06);
     }
 
     /* ── Header ── */
     header {
-      background: #1a237e;
+      background: linear-gradient(135deg, #16213e, #0f3460);
       color: white;
-      padding: 20px 24px;
+      padding: 22px 24px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
     header h1 { font-size: 18px; font-weight: 600; margin-bottom: 3px; }
-    header p  { font-size: 13px; opacity: 0.75; }
+    header p  { font-size: 13px; opacity: 0.65; }
     .round-badge {
-      background: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.12);
       font-size: 12px;
       font-weight: 500;
       padding: 4px 12px;
       border-radius: 20px;
       white-space: nowrap;
       margin-top: 2px;
+      color: #e94560;
     }
 
     /* ── Chat ── */
@@ -58,7 +60,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      background: #fafbfc;
+      background: #12122a;
     }
 
     .message {
@@ -73,11 +75,13 @@
       width: 34px; height: 34px;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 17px;
+      font-size: 15px;
       flex-shrink: 0;
-      background: #e8eaf6;
+      font-weight: 600;
+      color: white;
     }
-    .message.user .avatar { background: #e8f5e9; }
+    .message.bot  .avatar { background: #e94560; }
+    .message.user .avatar { background: #0f3460; }
 
     .bubble {
       padding: 10px 14px;
@@ -85,13 +89,14 @@
       font-size: 14px;
       line-height: 1.55;
     }
-    .message.bot  .bubble {
-      background: #f0f1f5;
+    .message.bot .bubble {
+      background: #1e1e3a;
+      border: 1px solid rgba(255,255,255,0.06);
       border-bottom-left-radius: 4px;
-      color: #1a1a2e;
+      color: #d0d0e0;
     }
     .message.user .bubble {
-      background: #1a237e;
+      background: #0f3460;
       color: white;
       border-bottom-right-radius: 4px;
     }
@@ -108,16 +113,17 @@
       font-weight: 500;
       padding: 2px 8px;
       border-radius: 10px;
-      background: rgba(0,0,0,0.07);
+      background: rgba(255,255,255,0.08);
+      color: #aab;
     }
-    .message.user .offer-pill span { background: rgba(255,255,255,0.2); }
+    .message.user .offer-pill span { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); }
 
     /* Typing indicator */
     .typing-dot {
       display: inline-block;
       width: 7px; height: 7px;
       border-radius: 50%;
-      background: #888;
+      background: #e94560;
       margin: 0 2px;
       animation: blink 1.2s infinite;
     }
@@ -130,16 +136,16 @@
 
     /* ── Form ── */
     .form-area {
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid rgba(255,255,255,0.06);
       padding: 20px 24px;
-      background: white;
+      background: #1a1a2e;
     }
     .form-area h3 {
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.07em;
       text-transform: uppercase;
-      color: #888;
+      color: #666;
       margin-bottom: 14px;
     }
 
@@ -153,27 +159,28 @@
       display: block;
       font-size: 12px;
       font-weight: 500;
-      color: #555;
+      color: #999;
       margin-bottom: 5px;
     }
     .field .hint {
       font-size: 11px;
-      color: #aaa;
+      color: #555;
       font-weight: 400;
       margin-left: 3px;
     }
     .field input {
       width: 100%;
       padding: 9px 12px;
-      border: 1px solid #d0d5dd;
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
       font-size: 14px;
-      background: white;
-      color: #1a1a2e;
+      background: #12122a;
+      color: #e0e0f0;
       transition: border-color 0.15s;
     }
-    .field input:focus  { outline: none; border-color: #1a237e; }
-    .field input:disabled { background: #f7f8fa; color: #aaa; }
+    .field input:focus  { outline: none; border-color: #e94560; }
+    .field input:disabled { background: #0f0f1a; color: #444; }
+    .field input::placeholder { color: #444; }
 
     .actions { display: flex; gap: 10px; }
 
@@ -186,29 +193,29 @@
       border: none;
       transition: opacity 0.15s, background 0.15s;
     }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-primary   { background: #1a237e; color: white; }
-    .btn-primary:not(:disabled):hover { background: #283593; }
-    .btn-secondary { background: #e9ecef; color: #333; }
-    .btn-secondary:not(:disabled):hover { background: #dee2e6; }
-    .btn-reset { background: none; color: #888; font-size: 13px; padding: 10px 12px; }
-    .btn-reset:hover { color: #333; }
+    button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-primary   { background: #e94560; color: white; }
+    .btn-primary:not(:disabled):hover { background: #d63851; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: #ccc; }
+    .btn-secondary:not(:disabled):hover { background: rgba(255,255,255,0.14); }
+    .btn-reset { background: none; color: #666; font-size: 13px; padding: 10px 12px; }
+    .btn-reset:hover { color: #aaa; }
 
     /* ── Status bar ── */
     .status-bar {
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid rgba(255,255,255,0.06);
       padding: 10px 24px;
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 12px;
-      color: #888;
-      background: #fafbfc;
+      color: #555;
+      background: #16162e;
     }
     .score-bar-wrap {
       flex: 1;
       height: 6px;
-      background: #e9ecef;
+      background: rgba(255,255,255,0.06);
       border-radius: 3px;
       overflow: hidden;
     }
@@ -217,7 +224,7 @@
       border-radius: 3px;
       width: 0%;
       transition: width 0.4s, background 0.4s;
-      background: #aaa;
+      background: #555;
     }
     .score-label { font-weight: 600; min-width: 38px; text-align: right; }
   </style>
@@ -226,8 +233,8 @@
 <div class="app">
   <header>
     <div>
-      <h1>Negotiation Agent</h1>
-      <p>You are the <strong>Supplier</strong>. Negotiate with the automated Buyer Agent.</p>
+      <h1>Series A Negotiation</h1>
+      <p>You are the <strong>VC investor</strong>. Negotiate term sheet with the founder.</p>
     </div>
     <div class="round-badge" id="roundBadge">Round 1 / 6</div>
   </header>
@@ -235,34 +242,34 @@
   <div class="chat" id="chat"></div>
 
   <div class="form-area" id="formArea">
-    <h3>Your Offer</h3>
+    <h3>Your Term Sheet</h3>
     <div class="fields">
       <div class="field">
-        <label>Price per unit <span class="hint">($)</span></label>
-        <input type="number" id="price" min="1" step="1" placeholder="e.g. 130" />
+        <label>Valuation <span class="hint">($M pre-money)</span></label>
+        <input type="number" id="valuation" min="1" step="1" placeholder="e.g. 25" />
       </div>
       <div class="field">
-        <label>Payment terms <span class="hint">(days, e.g. 30 = Net 30)</span></label>
-        <input type="number" id="paymentTerms" min="1" step="1" placeholder="e.g. 30" />
+        <label>Equity <span class="hint">(% for your fund)</span></label>
+        <input type="number" id="equity" min="1" max="100" step="1" placeholder="e.g. 20" />
       </div>
       <div class="field">
-        <label>Delivery time <span class="hint">(days)</span></label>
-        <input type="number" id="deliveryDays" min="1" step="1" placeholder="e.g. 14" />
+        <label>Board seats <span class="hint">(for your fund)</span></label>
+        <input type="number" id="boardSeats" min="0" step="1" placeholder="e.g. 2" />
       </div>
       <div class="field">
-        <label>Contract length <span class="hint">(months)</span></label>
-        <input type="number" id="contractMonths" min="1" step="1" placeholder="e.g. 12" />
+        <label>Liquidation pref <span class="hint">(x multiple)</span></label>
+        <input type="number" id="liquidationPref" min="0.5" step="0.1" placeholder="e.g. 1.5" />
       </div>
     </div>
     <div class="actions">
-      <button class="btn-primary"   id="submitBtn"  onclick="submitOffer()">Submit Offer</button>
-      <button class="btn-secondary" id="acceptBtn"  onclick="acceptCounter()" style="display:none">Accept Bot's Counter</button>
-      <button class="btn-reset"     id="resetBtn"   onclick="resetGame()"    style="display:none">Start over</button>
+      <button class="btn-primary"   id="submitBtn"  onclick="submitOffer()">Submit Term Sheet</button>
+      <button class="btn-secondary" id="acceptBtn"  onclick="acceptCounter()" style="display:none">Accept Founder's Counter</button>
+      <button class="btn-reset"     id="resetBtn"   onclick="resetGame()"    style="display:none">New Negotiation</button>
     </div>
   </div>
 
   <div class="status-bar">
-    <span>Buyer satisfaction</span>
+    <span>Founder satisfaction</span>
     <div class="score-bar-wrap"><div class="score-bar" id="scoreBar"></div></div>
     <span class="score-label" id="scoreLabel">—</span>
   </div>
@@ -274,9 +281,9 @@
   let ended = false;
 
   const BOT_INTRO =
-    'Hi! I\'m an automated buyer agent. I\'m looking to purchase goods and want to find terms that work for both sides.\n\n' +
-    'My opening position: price ~$100/unit, Net 60+ payment, delivery within 10 days, contract under 6 months.\n\n' +
-    'Please submit your opening offer.';
+    'Hey — thanks for taking the meeting. We\'re raising a Series A and I\'m excited about what we\'re building.\n\n' +
+    'Here\'s where I\'d love to land: ~$50M pre-money valuation, 10-15% equity, 1 board seat for you, and a clean 1x liquidation preference.\n\n' +
+    'I know we\'ll need to find middle ground. Send over your opening term sheet.';
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -288,12 +295,11 @@
 
     const avatar = document.createElement('div');
     avatar.className = 'avatar';
-    avatar.textContent = role === 'bot' ? '🤖' : '🏭';
+    avatar.textContent = role === 'bot' ? 'F' : 'VC';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
 
-    // Preserve line breaks in bot intro
     text.split('\n').forEach((line, i) => {
       if (i > 0) bubble.appendChild(document.createElement('br'));
       bubble.appendChild(document.createTextNode(line));
@@ -303,10 +309,10 @@
       const pill = document.createElement('div');
       pill.className = 'offer-pill';
       pill.innerHTML =
-        `<span>$${offerData.price}</span>` +
-        `<span>Net ${offerData.paymentTerms}</span>` +
-        `<span>${offerData.deliveryDays}d delivery</span>` +
-        `<span>${offerData.contractMonths}mo contract</span>`;
+        `<span>$${offerData.valuation}M</span>` +
+        `<span>${offerData.equity}% equity</span>` +
+        `<span>${offerData.boardSeats} seat${offerData.boardSeats !== 1 ? 's' : ''}</span>` +
+        `<span>${offerData.liquidationPref}x liq pref</span>`;
       bubble.appendChild(pill);
     }
 
@@ -323,7 +329,7 @@
     wrapper.className = 'message bot';
     wrapper.id = 'typing';
     wrapper.innerHTML =
-      '<div class="avatar">🤖</div>' +
+      '<div class="avatar" style="font-size:15px">F</div>' +
       '<div class="bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
     chat.appendChild(wrapper);
     chat.scrollTop = chat.scrollHeight;
@@ -338,29 +344,29 @@
     const bar   = document.getElementById('scoreBar');
     const label = document.getElementById('scoreLabel');
     bar.style.width      = utility + '%';
-    bar.style.background = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#dc2626';
+    bar.style.background = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#e94560';
     label.textContent    = utility + '%';
-    label.style.color    = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#dc2626';
+    label.style.color    = utility >= 70 ? '#16a34a' : utility >= 40 ? '#d97706' : '#e94560';
   }
 
   function fillForm(offer) {
-    document.getElementById('price').value         = offer.price;
-    document.getElementById('paymentTerms').value  = offer.paymentTerms;
-    document.getElementById('deliveryDays').value  = offer.deliveryDays;
-    document.getElementById('contractMonths').value = offer.contractMonths;
+    document.getElementById('valuation').value       = offer.valuation;
+    document.getElementById('equity').value           = offer.equity;
+    document.getElementById('boardSeats').value       = offer.boardSeats;
+    document.getElementById('liquidationPref').value  = offer.liquidationPref;
   }
 
   function readForm() {
     return {
-      price:          parseFloat(document.getElementById('price').value),
-      paymentTerms:   parseFloat(document.getElementById('paymentTerms').value),
-      deliveryDays:   parseFloat(document.getElementById('deliveryDays').value),
-      contractMonths: parseFloat(document.getElementById('contractMonths').value),
+      valuation:       parseFloat(document.getElementById('valuation').value),
+      equity:          parseFloat(document.getElementById('equity').value),
+      boardSeats:      parseFloat(document.getElementById('boardSeats').value),
+      liquidationPref: parseFloat(document.getElementById('liquidationPref').value),
     };
   }
 
   function setFormDisabled(disabled) {
-    ['price', 'paymentTerms', 'deliveryDays', 'contractMonths'].forEach(id => {
+    ['valuation', 'equity', 'boardSeats', 'liquidationPref'].forEach(id => {
       document.getElementById(id).disabled = disabled;
     });
   }
@@ -381,7 +387,7 @@
     document.getElementById('submitBtn').disabled = true;
     document.getElementById('acceptBtn').style.display = 'none';
 
-    addMessage('user', 'My offer:', offer);
+    addMessage('user', 'My term sheet:', offer);
     showTyping();
 
     try {
@@ -441,7 +447,7 @@
     document.getElementById('acceptBtn').style.display = 'none';
     document.getElementById('resetBtn').style.display  = 'none';
     setFormDisabled(false);
-    fillForm({ price: '', paymentTerms: '', deliveryDays: '', contractMonths: '' });
+    fillForm({ valuation: '', equity: '', boardSeats: '', liquidationPref: '' });
 
     addMessage('bot', BOT_INTRO);
   }
