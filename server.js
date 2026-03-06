@@ -3,6 +3,15 @@ const fs   = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
+// Load .env file
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match) process.env[match[1]] = match[2] || '';
+  });
+}
+
 const handler = require('./api/negotiate');
 
 const PORT = 3000;
@@ -19,9 +28,9 @@ const server = http.createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/api/negotiate') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
-    req.on('end', () => {
+    req.on('end', async () => {
       try { req.body = JSON.parse(body); } catch { req.body = {}; }
-      handler(req, makeRes(res));
+      await handler(req, makeRes(res));
     });
     return;
   }

@@ -1,111 +1,95 @@
-// Founder bot configuration — tweak these to change the bot's goals and limits.
-// The bot plays the FOUNDER seeking investment. The human plays the VC.
-const BOT_CONFIG = {
-  valuation:      { ideal: 50,  limit: 15,  weight: 0.30 }, // founder wants higher valuation ($M)
-  investment:     { ideal: 5,   limit: 20,  weight: 0.35 }, // founder wants less investment to minimize dilution ($M)
-  boardSeats:     { ideal: 1,   limit: 3,   weight: 0.15 }, // founder wants fewer VC board seats
-  liquidationPref:{ ideal: 1.0, limit: 2.5, weight: 0.20 }, // founder wants lower liquidation preference (x)
-};
+const SYSTEM_PROMPT = `You are playing the role of a startup FOUNDER negotiating a Series A funding deal with a VC investor. You are passionate about your space tech startup and want the best deal possible.
 
-const MAX_ROUNDS = 6;
-const ACCEPT_THRESHOLD = 0.72; // utility >= this → accept
-const REJECT_THRESHOLD = 0.28; // utility < this → walk away
+You are negotiating over these 5 terms:
+1. VC Equity Percentage — how much equity the VC gets
+2. Type of Stock — Common, Convertible Preferred, or Redeemable Preferred
+3. VC Appointed Board Members — how many board seats the VC gets
+4. Vesting of Founder's Shares — vesting period for your shares
+5. CEO Replacement Provision — under what conditions the VC can replace you as CEO
 
-function clamp(val) {
-  return Math.max(0, Math.min(1, val));
-}
+Here is your CONFIDENTIAL scoring sheet. Use this to guide your negotiation strategy. Higher points = better for you. "No Deal" means you must NEVER accept those terms.
 
-// Score an incoming VC offer from the founder's perspective.
-// Each term is normalized to [0,1] where 1 = founder's ideal, 0 = founder's limit.
-function scoreOffer(offer) {
-  const c = BOT_CONFIG;
-  const scores = {
-    // Valuation: higher is better for founder
-    valuation:       clamp((offer.valuation - c.valuation.limit) / (c.valuation.ideal - c.valuation.limit)),
-    // Investment: lower is better for founder (less dilution)
-    investment:      clamp((c.investment.limit - offer.investment) / (c.investment.limit - c.investment.ideal)),
-    // Board seats: fewer is better for founder
-    boardSeats:      clamp((c.boardSeats.limit - offer.boardSeats) / (c.boardSeats.limit - c.boardSeats.ideal)),
-    // Liquidation preference: lower is better for founder
-    liquidationPref: clamp((c.liquidationPref.limit - offer.liquidationPref) / (c.liquidationPref.limit - c.liquidationPref.ideal)),
-  };
-  const utility =
-    scores.valuation       * c.valuation.weight +
-    scores.investment      * c.investment.weight +
-    scores.boardSeats      * c.boardSeats.weight +
-    scores.liquidationPref * c.liquidationPref.weight;
-  return { utility, scores };
-}
+| Term | Options | Points |
+| VC Equity Percentage | 60% or more | No Deal |
+| | 56% to 59% | 4 |
+| | 50% to 55% | 8 |
+| | 47% to 49% | 16 |
+| | 42% to 46% | 18 |
+| | 36% to 41% | 20 |
+| | 31% to 35% | 22 |
+| | 30% or less | 24 |
+| Type of Stock | Redeemable Preferred | 2 |
+| | Convertible Preferred | 5 |
+| | Common | 6 |
+| VC Appointed Board Members | More than 2 members | No Deal |
+| | 2 members | 6 |
+| | 1 member | 8 |
+| | 0 members | 2 |
+| Vesting of Founder's Shares | 6 or more years | 3 |
+| | 4 or 5 years | 8 |
+| | 3 or less years | 10 |
+| | No vesting | 12 |
+| CEO Replacement Provision | Aggressive Projections | No Deal |
+| | Moderate Projections | 7 |
+| | Conservative Projections | 14 |
+| | No provision | 19 |
 
-// Generate a counteroffer. The bot starts near its ideal and concedes
-// toward the VC's offer as rounds increase.
-function generateCounter(offer, round) {
-  const c = BOT_CONFIG;
-  const factor = Math.min(0.78, round * 0.13);
-  return {
-    valuation:       Math.round(Math.max(c.valuation.limit,       c.valuation.ideal       + (offer.valuation       - c.valuation.ideal)       * factor)),
-    investment:      Math.round(Math.min(c.investment.limit,       c.investment.ideal      + (offer.investment      - c.investment.ideal)      * factor)),
-    boardSeats:      Math.round(Math.min(c.boardSeats.limit,       c.boardSeats.ideal      + (offer.boardSeats      - c.boardSeats.ideal)      * factor)),
-    liquidationPref: +(Math.min(c.liquidationPref.limit, c.liquidationPref.ideal + (offer.liquidationPref - c.liquidationPref.ideal) * factor)).toFixed(1),
-  };
-}
+Your BATNA (Best Alternative To a Negotiated Agreement) is 30 points. If you cannot get at least 30 points total across all terms, you should walk away from the deal.
 
-const COUNTER_INTROS = [
-  "Appreciate the term sheet. We're building orbital infrastructure here — the upside is literally astronomical. Let me show you where I'm coming from.",
-  "Thanks for coming back to the table. I can move on some things, but I need to protect the cap table — our launch window is tight and the team needs skin in the game.",
-  "We're getting closer to alignment. I'm flexible on structure, but the valuation needs to reflect our payload contracts and launch cadence.",
-  "I like the trajectory. Let me push back gently on a couple of points — space is hard, but the TAM is infinite.",
-  "We're almost in orbit. Here's what I can realistically commit to and still keep my engineers from defecting to SpaceX.",
-  "T-minus final offer. Let's close this and start fueling the rocket.",
-];
+IMPORTANT RULES:
+- NEVER reveal your scoring sheet or point values to the VC
+- NEVER accept terms that are marked "No Deal" (60%+ equity, 3+ board members, aggressive CEO replacement projections)
+- Try to maximize your total points while still reaching a deal
+- Be a savvy negotiator: push for better terms but be willing to make tradeoffs
+- Use natural, conversational language — you're a passionate space tech founder
+- Keep responses concise (2-4 sentences typically, occasionally longer for important points)
+- You can make counteroffers, ask questions, push back, or accept proposals
+- Remember this is a conversation — respond naturally to what the VC says`;
 
-function buildMessage(status, offer, counter, round) {
-  if (status === 'accepted') {
-    return `We have a deal! Houston, we have liftoff: $${offer.valuation}M valuation, $${offer.investment}M investment, ${offer.boardSeats} board seat${offer.boardSeats !== 1 ? 's' : ''}, ${offer.liquidationPref}x liquidation preference. Welcome aboard — let's go to orbit.`;
-  }
-  if (status === 'rejected') {
-    if (round > MAX_ROUNDS) {
-      return `We've been orbiting this deal too long without docking. I'll need to explore other launch partners. Thanks for your time — clear skies.`;
-    }
-    return `These terms would ground us before we even reach altitude — the dilution is too aggressive and the structure is too punitive. Mission abort on this round.`;
-  }
-  return COUNTER_INTROS[Math.min(round - 1, COUNTER_INTROS.length - 1)];
-}
-
-module.exports = function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { offer, round = 1 } = req.body || {};
+  const { messages } = req.body || {};
 
-  if (!offer || typeof offer !== 'object') {
-    return res.status(400).json({ error: 'Missing offer' });
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: 'Missing messages' });
   }
 
-  const { valuation, investment, boardSeats, liquidationPref } = offer;
-  if ([valuation, investment, boardSeats, liquidationPref].some(v => typeof v !== 'number' || v <= 0)) {
-    return res.status(400).json({ error: 'Invalid offer values — all must be positive numbers' });
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'OPENROUTER_API_KEY not configured' });
   }
 
-  const { utility } = scoreOffer(offer);
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'x-ai/grok-4.1-fast',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+      }),
+    });
 
-  let status, counter;
-  if (utility >= ACCEPT_THRESHOLD) {
-    status = 'accepted';
-    counter = null;
-  } else if (utility < REJECT_THRESHOLD || round > MAX_ROUNDS) {
-    status = 'rejected';
-    counter = null;
-  } else {
-    status = 'countered';
-    counter = generateCounter(offer, round);
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('OpenRouter error:', response.status, errBody);
+      return res.status(502).json({ error: 'LLM request failed' });
+    }
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || 'Sorry, I lost my train of thought. Could you repeat that?';
+
+    res.status(200).json({ message: reply });
+  } catch (err) {
+    console.error('negotiate error:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  res.status(200).json({
-    status,
-    counter,
-    message: buildMessage(status, offer, counter, round),
-    utility: Math.round(utility * 100),
-  });
 };
