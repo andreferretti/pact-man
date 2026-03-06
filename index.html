@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.469.0/font/lucide.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <title>Pact-Man</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -83,7 +84,7 @@
     .sidebar td {
       padding: 5px 6px;
       border-bottom: 1px solid rgba(125,151,165,0.08);
-      vertical-align: top;
+      vertical-align: middle;
     }
     .sidebar .term-header td {
       padding-top: 12px;
@@ -95,41 +96,44 @@
       font-weight: 600;
     }
 
-    /* -- Deal Tracker -- */
-    .tracker-term {
-      padding: 8px 6px;
-      border-bottom: 1px solid rgba(125,151,165,0.12);
+    /* -- Position dots in score sheet -- */
+    .dot-cell {
+      width: 24px;
+      text-align: right;
+      padding-right: 2px !important;
     }
-    .tracker-term-name {
-      font-weight: 600;
-      font-size: 13px;
-      color: #333;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tracker-positions {
-      font-size: 12px;
-      color: #555;
-      margin-top: 3px;
-      padding-left: 14px;
-    }
-    .tracker-points {
-      margin-left: auto;
-      font-weight: 600;
-      color: #4CAF50;
-      font-size: 12px;
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
+    .pos-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       display: inline-block;
-      flex-shrink: 0;
+      margin: 0 1px;
+      vertical-align: middle;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
-    .status-dot.open { background: #ccc; }
-    .status-dot.discussed { background: #D09047; }
-    .status-dot.tentatively_agreed { background: #4CAF50; }
+    .pos-dot.active { opacity: 1; }
+    .pos-dot.vc { background: #3B82F6; }
+    .pos-dot.founder { background: #D09047; }
+    .pos-dot.agreed { background: #4CAF50; }
+    .sidebar tr.agreed-row td { background: rgba(76, 175, 80, 0.08); }
+    .sidebar .legend {
+      display: flex;
+      gap: 14px;
+      font-size: 13px;
+      color: #7D97A5;
+      margin-bottom: 10px;
+    }
+    .sidebar .legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .sidebar .legend .pos-dot {
+      width: 9px;
+      height: 9px;
+    }
+
     .tracker-score-bar {
       margin-top: 14px;
       padding: 10px 12px;
@@ -263,6 +267,108 @@
     .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .send-btn:not(:disabled):hover { background: #0f3344; }
     .send-btn svg { width: 18px; height: 18px; }
+
+    /* -- Results -- */
+    .main { transition: opacity 0.5s ease; }
+    .main.fade-out { opacity: 0; }
+
+    .results {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #092430;
+      color: #fff;
+      padding: 60px 24px;
+      gap: 12px;
+    }
+    .results h2 {
+      font-size: 32px;
+      font-weight: 300;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #D09047;
+    }
+    .results-subtitle {
+      font-size: 14px;
+      opacity: 0.45;
+      margin-bottom: 32px;
+    }
+    .results-charts {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .result-chart .chart-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .chart-label .pts {
+      font-size: 20px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .chart-label .pts-max {
+      font-weight: 400;
+      opacity: 0.35;
+      font-size: 14px;
+    }
+    .chart-track {
+      height: 36px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .chart-fill {
+      height: 100%;
+      border-radius: 8px;
+      width: 0;
+      transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .chart-fill.vc { background: #3B82F6; }
+    .chart-fill.founder { background: #D09047; }
+    .chart-fill.total { background: #4CAF50; }
+    .results-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 4px 0;
+    }
+    .total-chart .chart-track { height: 44px; }
+    .results-note {
+      margin-top: 28px;
+      font-size: 12px;
+      opacity: 0.3;
+      text-align: center;
+    }
+    .results-back {
+      margin-top: 20px;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      font-family: inherit;
+    }
+    .results-back:hover {
+      color: rgba(255,255,255,0.85);
+      border-color: rgba(255,255,255,0.35);
+    }
+    @keyframes resultsFadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -286,63 +392,132 @@
     </div>
 
     <div class="sidebar">
-      <h3>Deal Tracker</h3>
-      <div id="tracker">
-        <div style="color: #7D97A5; font-size: 13px; padding: 8px 0;">Waiting for negotiation to begin...</div>
+      <div class="legend">
+        <span><span class="pos-dot vc active" style="opacity:1"></span> Your position</span>
+        <span><span class="pos-dot founder active" style="opacity:1"></span> Founder position</span>
+        <span><span class="pos-dot agreed active" style="opacity:1"></span> Agreed</span>
       </div>
-      <div class="tracker-score-bar">Your Score: <span id="vcScoreDisplay">0</span> pts <span style="color:#7D97A5; font-weight:400;">/ 30 BATNA</span></div>
-      <div id="trackerBanner" class="tracker-banner"></div>
-
-      <h3 style="margin-top: 22px;">Your Score Sheet (VC)</h3>
-      <table>
-        <tr><th>Option</th><th>Points</th></tr>
-        <tr class="term-header"><td colspan="2">#1: VC Equity %</td></tr>
-        <tr><td>25% or less</td><td class="no-deal">No Deal</td></tr>
-        <tr><td>26 - 34%</td><td>2</td></tr>
-        <tr><td>35 - 39%</td><td>3</td></tr>
-        <tr><td>40 - 45%</td><td>6</td></tr>
-        <tr><td>46 - 49%</td><td>9</td></tr>
-        <tr><td>50%</td><td>11</td></tr>
-        <tr><td>51 - 59%</td><td>15</td></tr>
-        <tr><td>60 - 69%</td><td>18</td></tr>
-        <tr><td>70% or more</td><td>20</td></tr>
-        <tr class="term-header"><td colspan="2">#2: Type of Stock</td></tr>
-        <tr><td>Common</td><td>0</td></tr>
-        <tr><td>Convertible Preferred</td><td>8</td></tr>
-        <tr><td>Redeemable Preferred</td><td>12</td></tr>
-        <tr class="term-header"><td colspan="2">#3: VC Board Members</td></tr>
-        <tr><td>0 members</td><td>0</td></tr>
-        <tr><td>1 member</td><td>3</td></tr>
-        <tr><td>2 members</td><td>5</td></tr>
-        <tr><td>3 members</td><td>7</td></tr>
-        <tr><td>More than 3</td><td>10</td></tr>
-        <tr class="term-header"><td colspan="2">#4: Founder Vesting</td></tr>
-        <tr><td>Less than 4 years</td><td class="no-deal">No Deal</td></tr>
-        <tr><td>4 years</td><td>8</td></tr>
-        <tr><td>5 years</td><td>12</td></tr>
-        <tr><td>More than 5 years</td><td>14</td></tr>
-        <tr class="term-header"><td colspan="2">#5: CEO Replacement</td></tr>
-        <tr><td>No provision</td><td class="no-deal">No Deal</td></tr>
-        <tr><td>Conservative Projections</td><td>6</td></tr>
-        <tr><td>Moderate Projections</td><td>10</td></tr>
-        <tr><td>Aggressive Projections</td><td>16</td></tr>
+      <table id="scoreSheet">
+        <tr><th></th><th>Option</th><th>Points</th></tr>
+        <tr class="term-header"><td colspan="3">#1: VC Equity %</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="25_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>25% or less</td><td class="no-deal">No Deal</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="26_34"><td class="dot-cell"><span class="pos-dot"></span></td><td>26 - 34%</td><td>2</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="35_39"><td class="dot-cell"><span class="pos-dot"></span></td><td>35 - 39%</td><td>3</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="40_45"><td class="dot-cell"><span class="pos-dot"></span></td><td>40 - 45%</td><td>6</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="46_49"><td class="dot-cell"><span class="pos-dot"></span></td><td>46 - 49%</td><td>9</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="50"><td class="dot-cell"><span class="pos-dot"></span></td><td>50%</td><td>11</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="51_59"><td class="dot-cell"><span class="pos-dot"></span></td><td>51 - 59%</td><td>15</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="60_69"><td class="dot-cell"><span class="pos-dot"></span></td><td>60 - 69%</td><td>18</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="70_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>70% or more</td><td>20</td></tr>
+        <tr class="term-header"><td colspan="3">#2: Type of Stock</td></tr>
+        <tr data-term="type_of_stock" data-match="common"><td class="dot-cell"><span class="pos-dot"></span></td><td>Common</td><td>0</td></tr>
+        <tr data-term="type_of_stock" data-match="convertible"><td class="dot-cell"><span class="pos-dot"></span></td><td>Convertible Preferred</td><td>8</td></tr>
+        <tr data-term="type_of_stock" data-match="redeemable"><td class="dot-cell"><span class="pos-dot"></span></td><td>Redeemable Preferred</td><td>12</td></tr>
+        <tr class="term-header"><td colspan="3">#3: VC Board Members</td></tr>
+        <tr data-term="vc_board_members" data-match="0"><td class="dot-cell"><span class="pos-dot"></span></td><td>0 members</td><td>0</td></tr>
+        <tr data-term="vc_board_members" data-match="1"><td class="dot-cell"><span class="pos-dot"></span></td><td>1 member</td><td>3</td></tr>
+        <tr data-term="vc_board_members" data-match="2"><td class="dot-cell"><span class="pos-dot"></span></td><td>2 members</td><td>5</td></tr>
+        <tr data-term="vc_board_members" data-match="3"><td class="dot-cell"><span class="pos-dot"></span></td><td>3 members</td><td>7</td></tr>
+        <tr data-term="vc_board_members" data-match="more_than_3"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 3</td><td>10</td></tr>
+        <tr class="term-header"><td colspan="3">#4: Founder Vesting</td></tr>
+        <tr data-term="founder_vesting" data-match="less_than_4"><td class="dot-cell"><span class="pos-dot"></span></td><td>Less than 4 years</td><td class="no-deal">No Deal</td></tr>
+        <tr data-term="founder_vesting" data-match="4"><td class="dot-cell"><span class="pos-dot"></span></td><td>4 years</td><td>8</td></tr>
+        <tr data-term="founder_vesting" data-match="5"><td class="dot-cell"><span class="pos-dot"></span></td><td>5 years</td><td>12</td></tr>
+        <tr data-term="founder_vesting" data-match="more_than_5"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 5 years</td><td>14</td></tr>
+        <tr class="term-header"><td colspan="3">#5: CEO Replacement</td></tr>
+        <tr data-term="ceo_replacement" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No provision</td><td class="no-deal">No Deal</td></tr>
+        <tr data-term="ceo_replacement" data-match="conservative"><td class="dot-cell"><span class="pos-dot"></span></td><td>Conservative Projections</td><td>6</td></tr>
+        <tr data-term="ceo_replacement" data-match="moderate"><td class="dot-cell"><span class="pos-dot"></span></td><td>Moderate Projections</td><td>10</td></tr>
+        <tr data-term="ceo_replacement" data-match="aggressive"><td class="dot-cell"><span class="pos-dot"></span></td><td>Aggressive Projections</td><td>16</td></tr>
       </table>
+      <div class="tracker-score-bar">Your Score: <span id="vcScoreDisplay">0</span> pts / 30</div>
+      <div id="trackerBanner" class="tracker-banner"></div>
     </div>
   </div>
 
+  <div class="results" id="results">
+    <h2>Deal Complete</h2>
+    <div class="results-subtitle">Final scores vs. maximum achievable</div>
+    <div class="results-charts">
+      <div class="result-chart">
+        <div class="chart-label">
+          <span>VC (You)</span>
+          <span class="pts"><span id="vcResultValue">0</span> <span class="pts-max">/ 54</span></span>
+        </div>
+        <div class="chart-track"><div class="chart-fill vc" id="vcBar"></div></div>
+      </div>
+      <div class="result-chart">
+        <div class="chart-label">
+          <span>Founder</span>
+          <span class="pts"><span id="founderResultValue">0</span> <span class="pts-max">/ 59</span></span>
+        </div>
+        <div class="chart-track"><div class="chart-fill founder" id="founderBar"></div></div>
+      </div>
+      <div class="results-divider"></div>
+      <div class="result-chart total-chart">
+        <div class="chart-label">
+          <span>Combined Value</span>
+          <span class="pts"><span id="totalResultValue">0</span> <span class="pts-max">/ 92</span></span>
+        </div>
+        <div class="chart-track"><div class="chart-fill total" id="totalBar"></div></div>
+      </div>
+    </div>
+    <div class="results-note">Maximums are constrained by both sides reaching their 30-point BATNA</div>
+    <button class="results-back" onclick="goBackToChat()">View conversation</button>
+  </div>
+
 <script>
-  // Conversation history sent to the API
   let conversationHistory = [];
   let sending = false;
   let negotiationState = null;
 
-  const TERM_LABELS = {
-    vc_equity_percentage: 'VC Equity %',
-    type_of_stock: 'Stock Type',
-    vc_board_members: 'Board Members',
-    founder_vesting: 'Founder Vesting',
-    ceo_replacement: 'CEO Replacement',
-  };
+  // Map a free-text position value to a data-match key for a given term
+  function positionToMatch(term, value) {
+    if (!value) return null;
+    switch (term) {
+      case 'vc_equity_percentage': {
+        const p = parseFloat(value);
+        if (isNaN(p)) return null;
+        if (p <= 25) return '25_or_less';
+        if (p <= 34) return '26_34'; if (p <= 39) return '35_39'; if (p <= 45) return '40_45';
+        if (p <= 49) return '46_49'; if (p === 50) return '50'; if (p <= 59) return '51_59';
+        if (p <= 69) return '60_69'; return '70_plus';
+      }
+      case 'type_of_stock': {
+        const v = value.toLowerCase();
+        if (v.includes('redeemable')) return 'redeemable';
+        if (v.includes('convertible')) return 'convertible';
+        if (v.includes('common')) return 'common';
+        return null;
+      }
+      case 'vc_board_members': {
+        const n = parseInt(value);
+        if (isNaN(n)) return null;
+        if (n === 0) return '0'; if (n === 1) return '1'; if (n === 2) return '2';
+        if (n === 3) return '3'; return 'more_than_3';
+      }
+      case 'founder_vesting': {
+        const v = value.toLowerCase();
+        if (v === 'none' || v === 'no vesting' || v === '0') return 'less_than_4';
+        if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 'more_than_5';
+        if (v.includes('less than 4') || v.includes('under 4')) return 'less_than_4';
+        const ym = value.match(/\d+/);
+        const y = ym ? parseFloat(ym[0]) : NaN;
+        if (isNaN(y)) return null;
+        if (y < 4) return 'less_than_4'; if (y === 4) return '4'; if (y === 5) return '5';
+        return 'more_than_5';
+      }
+      case 'ceo_replacement': {
+        const v = value.toLowerCase();
+        if (v.includes('no provision') || v === 'none') return 'none';
+        if (v.includes('conservative')) return 'conservative';
+        if (v.includes('moderate')) return 'moderate';
+        if (v.includes('aggressive')) return 'aggressive';
+        return null;
+      }
+    }
+    return null;
+  }
 
   function getVCPoints(term, value) {
     if (!value) return null;
@@ -369,7 +544,10 @@
       case 'founder_vesting': {
         const v = value.toLowerCase();
         if (v === 'none' || v === 'no vesting' || v === '0') return 'No Deal';
-        const y = parseFloat(value);
+        if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 14;
+        if (v.includes('less than 4') || v.includes('under 4')) return 'No Deal';
+        const ym = value.match(/\d+/);
+        const y = ym ? parseFloat(ym[0]) : NaN;
         if (isNaN(y)) return null;
         if (y < 4) return 'No Deal'; if (y === 4) return 8; if (y === 5) return 12; return 14;
       }
@@ -385,52 +563,78 @@
 
   function updateTracker(state) {
     negotiationState = state;
-    const tracker = document.getElementById('tracker');
     const banner = document.getElementById('trackerBanner');
 
-    if (!state || !state.terms) {
-      tracker.innerHTML = '<div style="color: #7D97A5; font-size: 13px; padding: 8px 0;">Waiting for negotiation to begin...</div>';
-      return;
-    }
+    // Reset all dots and row highlights
+    document.querySelectorAll('#scoreSheet .pos-dot').forEach(d => {
+      d.classList.remove('active', 'vc', 'founder', 'agreed');
+    });
+    document.querySelectorAll('#scoreSheet tr.agreed-row').forEach(r => {
+      r.classList.remove('agreed-row');
+    });
 
-    let html = '';
-    for (const [key, label] of Object.entries(TERM_LABELS)) {
+    if (!state || !state.terms) return;
+
+    const termKeys = ['vc_equity_percentage', 'type_of_stock', 'vc_board_members', 'founder_vesting', 'ceo_replacement'];
+    let vcScore = 0;
+    let vcNoDeal = false;
+
+    for (const key of termKeys) {
       const t = state.terms[key];
-      const status = t?.status || 'open';
+      if (!t) continue;
 
-      html += '<div class="tracker-term">';
-      html += `<div class="tracker-term-name"><span class="status-dot ${status}"></span>${label}`;
+      const isAgreed = t.status === 'tentatively_agreed' && t.agreed_value;
 
-      if (status === 'tentatively_agreed' && t.agreed_value) {
+      if (isAgreed) {
+        const matchKey = positionToMatch(key, t.agreed_value);
+        if (matchKey) {
+          const row = document.querySelector(`#scoreSheet tr[data-term="${key}"][data-match="${matchKey}"]`);
+          if (row) {
+            row.classList.add('agreed-row');
+            row.querySelectorAll('.pos-dot').forEach(d => {
+              d.classList.add('active', 'agreed');
+            });
+          }
+        }
         const pts = getVCPoints(key, t.agreed_value);
-        if (pts === 'No Deal') {
-          html += '<span class="tracker-points" style="color:#e05555;">No Deal</span>';
-        } else if (pts !== null) {
-          html += `<span class="tracker-points">+${pts}</span>`;
+        if (pts === 'No Deal') vcNoDeal = true;
+        else if (typeof pts === 'number') vcScore += pts;
+      } else {
+        const vcMatch = t.vc_position ? positionToMatch(key, t.vc_position) : null;
+        const founderMatch = t.founder_position ? positionToMatch(key, t.founder_position) : null;
+
+        if (vcMatch && founderMatch && vcMatch === founderMatch) {
+          const row = document.querySelector(`#scoreSheet tr[data-term="${key}"][data-match="${vcMatch}"]`);
+          if (row) {
+            row.classList.add('agreed-row');
+            const dot = row.querySelector('.pos-dot');
+            if (dot) dot.classList.add('active', 'agreed');
+          }
+          const pts = getVCPoints(key, t.vc_position);
+          if (pts === 'No Deal') vcNoDeal = true;
+          else if (typeof pts === 'number') vcScore += pts;
+        } else {
+          if (vcMatch) {
+            const row = document.querySelector(`#scoreSheet tr[data-term="${key}"][data-match="${vcMatch}"]`);
+            if (row) {
+              const dot = row.querySelector('.pos-dot');
+              if (dot) dot.classList.add('active', 'vc');
+            }
+          }
+          if (founderMatch) {
+            const row = document.querySelector(`#scoreSheet tr[data-term="${key}"][data-match="${founderMatch}"]`);
+            if (row) {
+              const dot = row.querySelector('.pos-dot');
+              if (dot) dot.classList.add('active', 'founder');
+            }
+          }
         }
       }
-      html += '</div>';
-
-      if (status === 'discussed') {
-        let pos = '';
-        if (t.vc_position) pos += `You: ${t.vc_position}`;
-        if (t.founder_position) { if (pos) pos += ' &middot; '; pos += `Founder: ${t.founder_position}`; }
-        if (pos) html += `<div class="tracker-positions">${pos}</div>`;
-      } else if (status === 'tentatively_agreed' && t.agreed_value) {
-        html += `<div class="tracker-positions" style="color:#4CAF50;">Agreed: ${t.agreed_value}</div>`;
-      } else {
-        html += '<div class="tracker-positions" style="color:#aaa;">Not discussed</div>';
-      }
-
-      html += '</div>';
     }
-    tracker.innerHTML = html;
 
-    // Update score
-    const vcScore = state.vc_score || 0;
     const scoreEl = document.getElementById('vcScoreDisplay');
     scoreEl.textContent = vcScore;
-    if (state.vc_no_deal) {
+    if (vcNoDeal) {
       scoreEl.style.color = '#e05555';
     } else if (vcScore >= 30) {
       scoreEl.style.color = '#4CAF50';
@@ -444,10 +648,126 @@
     if (state.overall_status === 'deal_reached') {
       banner.textContent = 'Deal Reached!';
       banner.className = 'tracker-banner deal';
+      document.getElementById('userInput').disabled = true;
+      document.getElementById('sendBtn').disabled = true;
+      setTimeout(showResults, 1500);
     } else if (state.overall_status === 'walked_away') {
       banner.textContent = 'Negotiation Ended — No Deal';
       banner.className = 'tracker-banner walked';
     }
+  }
+
+  function getFounderPoints(term, value) {
+    if (!value) return null;
+    switch (term) {
+      case 'vc_equity_percentage': {
+        const p = parseFloat(value);
+        if (isNaN(p)) return null;
+        if (p >= 60) return 'No Deal'; if (p >= 56) return 4; if (p >= 50) return 8;
+        if (p >= 47) return 16; if (p >= 42) return 18; if (p >= 36) return 20;
+        if (p >= 31) return 22; return 24;
+      }
+      case 'type_of_stock': {
+        const v = value.toLowerCase();
+        if (v.includes('common')) return 6; if (v.includes('convertible')) return 5;
+        if (v.includes('redeemable')) return 2; return null;
+      }
+      case 'vc_board_members': {
+        const n = parseInt(value);
+        if (isNaN(n)) return null;
+        if (n > 2) return 'No Deal'; if (n === 2) return 6; if (n === 1) return 8; return 2;
+      }
+      case 'founder_vesting': {
+        const v = value.toLowerCase();
+        if (v === 'none' || v === 'no vesting' || v === '0') return 12;
+        if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 3;
+        if (v.includes('less than 4') || v.includes('under 4')) return 10;
+        const ym = value.match(/\d+/);
+        const y = ym ? parseFloat(ym[0]) : NaN;
+        if (isNaN(y)) return null;
+        if (y >= 6) return 3; if (y >= 4) return 8; return 10;
+      }
+      case 'ceo_replacement': {
+        const v = value.toLowerCase();
+        if (v.includes('aggressive')) return 'No Deal'; if (v.includes('moderate')) return 7;
+        if (v.includes('conservative')) return 14;
+        if (v.includes('no provision') || v === 'none') return 19; return null;
+      }
+    }
+    return null;
+  }
+
+  function showResults(skipFade) {
+    if (!negotiationState || !negotiationState.terms) return;
+
+    const BATNA = 30;
+    const termKeys = ['vc_equity_percentage', 'type_of_stock', 'vc_board_members', 'founder_vesting', 'ceo_replacement'];
+    let vcTotal = 0, founderTotal = 0, hasNoDeal = false;
+
+    for (const key of termKeys) {
+      const t = negotiationState.terms[key];
+      if (t && t.status === 'tentatively_agreed' && t.agreed_value) {
+        const vp = getVCPoints(key, t.agreed_value);
+        const fp = getFounderPoints(key, t.agreed_value);
+        if (vp === 'No Deal' || fp === 'No Deal') hasNoDeal = true;
+        if (typeof vp === 'number') vcTotal += vp;
+        if (typeof fp === 'number') founderTotal += fp;
+      }
+    }
+
+    if (hasNoDeal || vcTotal < BATNA || founderTotal < BATNA) return;
+
+    const combined = vcTotal + founderTotal;
+    const VC_MAX = 54, FOUNDER_MAX = 59, TOTAL_MAX = 92;
+
+    document.getElementById('vcResultValue').textContent = vcTotal;
+    document.getElementById('founderResultValue').textContent = founderTotal;
+    document.getElementById('totalResultValue').textContent = combined;
+
+    const mainEl = document.querySelector('.main');
+    const fadeDelay = skipFade ? 0 : 500;
+
+    if (skipFade) {
+      mainEl.style.display = 'none';
+    } else {
+      mainEl.classList.add('fade-out');
+    }
+
+    setTimeout(() => {
+      mainEl.style.display = 'none';
+      const results = document.getElementById('results');
+      results.style.display = 'flex';
+      results.style.animation = 'resultsFadeIn 0.6s ease both';
+
+      setTimeout(() => {
+        document.getElementById('vcBar').style.width = (vcTotal / VC_MAX * 100) + '%';
+      }, 300);
+      setTimeout(() => {
+        document.getElementById('founderBar').style.width = (founderTotal / FOUNDER_MAX * 100) + '%';
+      }, 550);
+      setTimeout(() => {
+        document.getElementById('totalBar').style.width = (combined / TOTAL_MAX * 100) + '%';
+      }, 900);
+
+      setTimeout(fireConfetti, 400);
+    }, fadeDelay);
+  }
+
+  function fireConfetti() {
+    const end = Date.now() + 1800;
+    const colors = ['#D09047', '#3B82F6', '#4CAF50', '#ffffff'];
+    (function frame() {
+      confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors });
+      confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  }
+
+  function goBackToChat() {
+    document.getElementById('results').style.display = 'none';
+    const mainEl = document.querySelector('.main');
+    mainEl.classList.remove('fade-out');
+    mainEl.style.display = 'flex';
   }
 
   const BOT_INTRO =
@@ -512,7 +832,6 @@
       e.preventDefault();
       sendMessage();
     }
-    // Auto-resize on next tick
     setTimeout(() => autoResize(e.target), 0);
   }
 
@@ -546,7 +865,12 @@
       addMessage('bot', reply);
       conversationHistory.push({ role: 'assistant', content: reply });
 
-      if (data.state) updateTracker(data.state);
+      if (data.state) {
+        if (data.state._judgeError) {
+          console.error('%c[Judge FAILED]', 'color:#e05555;font-weight:bold', data.state._judgeError);
+        }
+        updateTracker(data.state);
+      }
     } catch (err) {
       hideTyping();
       addMessage('bot', 'Something went wrong. Please try again.');
@@ -560,6 +884,20 @@
   // -- Init --
   addMessage('bot', BOT_INTRO);
   conversationHistory.push({ role: 'assistant', content: BOT_INTRO });
+
+  if (new URLSearchParams(location.search).has('results')) {
+    negotiationState = {
+      terms: {
+        vc_equity_percentage: { status: 'tentatively_agreed', agreed_value: '45' },
+        type_of_stock: { status: 'tentatively_agreed', agreed_value: 'Convertible Preferred' },
+        vc_board_members: { status: 'tentatively_agreed', agreed_value: '2' },
+        founder_vesting: { status: 'tentatively_agreed', agreed_value: '4' },
+        ceo_replacement: { status: 'tentatively_agreed', agreed_value: 'Moderate Projections' },
+      },
+      overall_status: 'deal_reached',
+    };
+    showResults(true);
+  }
 </script>
 </body>
 </html>

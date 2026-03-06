@@ -61,10 +61,10 @@ For each term, determine:
 - The agreed value (only if tentatively_agreed)
 
 IMPORTANT:
-- A term is "tentatively_agreed" ONLY if BOTH parties have clearly accepted the same value for it. One party proposing and the other not objecting is NOT agreement — mark as "discussed".
-- "deal_reached" means ALL 5 terms are agreed AND both parties explicitly confirm the overall deal.
+- A term is "tentatively_agreed" when both parties' latest positions converge on the SAME value.
+- A term is "discussed" only when both sides have stated DIFFERENT positions that haven't converged yet, or only one side has stated a position.
+- "deal_reached" means ALL 5 terms are tentatively_agreed AND either party signals the overall deal is done (e.g. "let's shake on it", summarizing all terms, or similar).
 - "walked_away" means either party has explicitly ended negotiations.
-- Be conservative — when in doubt, mark as "discussed" not "tentatively_agreed".
 
 Always report all 5 terms. Always call the tool exactly once.`;
 
@@ -151,7 +151,10 @@ function scoreFounderTerm(term, value) {
     case 'founder_vesting': {
       const v = value.toLowerCase();
       if (v === 'none' || v === 'no vesting' || v === '0') return 12;
-      const years = parseFloat(value);
+      if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 3;
+      if (v.includes('less than 4') || v.includes('under 4')) return 10;
+      const ym = value.match(/\d+/);
+      const years = ym ? parseFloat(ym[0]) : NaN;
       if (isNaN(years)) return null;
       if (years >= 6) return 3;
       if (years >= 4) return 8;
@@ -169,65 +172,9 @@ function scoreFounderTerm(term, value) {
   return null;
 }
 
-function scoreVCTerm(term, value) {
-  if (!value) return null;
-  switch (term) {
-    case 'vc_equity_percentage': {
-      const pct = parseFloat(value);
-      if (isNaN(pct)) return null;
-      if (pct <= 25) return 'no_deal';
-      if (pct <= 34) return 2;
-      if (pct <= 39) return 3;
-      if (pct <= 45) return 6;
-      if (pct <= 49) return 9;
-      if (pct === 50) return 11;
-      if (pct <= 59) return 15;
-      if (pct <= 69) return 18;
-      return 20;
-    }
-    case 'type_of_stock': {
-      const v = value.toLowerCase();
-      if (v.includes('common')) return 0;
-      if (v.includes('convertible')) return 8;
-      if (v.includes('redeemable')) return 12;
-      return null;
-    }
-    case 'vc_board_members': {
-      const n = parseInt(value);
-      if (isNaN(n)) return null;
-      if (n === 0) return 0;
-      if (n === 1) return 3;
-      if (n === 2) return 5;
-      if (n === 3) return 7;
-      return 10;
-    }
-    case 'founder_vesting': {
-      const v = value.toLowerCase();
-      if (v === 'none' || v === 'no vesting' || v === '0') return 'no_deal';
-      const years = parseFloat(value);
-      if (isNaN(years)) return null;
-      if (years < 4) return 'no_deal';
-      if (years === 4) return 8;
-      if (years === 5) return 12;
-      return 14;
-    }
-    case 'ceo_replacement': {
-      const v = value.toLowerCase();
-      if (v.includes('no provision') || v === 'none') return 'no_deal';
-      if (v.includes('conservative')) return 6;
-      if (v.includes('moderate')) return 10;
-      if (v.includes('aggressive')) return 16;
-      return null;
-    }
-  }
-  return null;
-}
-
 function calculateScores(state) {
   let founderScore = 0;
-  let vcScore = 0;
   let founderNoDeal = false;
-  let vcNoDeal = false;
   let agreedCount = 0;
 
   for (const key of Object.keys(state.terms)) {
@@ -235,15 +182,12 @@ function calculateScores(state) {
     if (term.status === 'tentatively_agreed' && term.agreed_value) {
       agreedCount++;
       const fs = scoreFounderTerm(key, term.agreed_value);
-      const vs = scoreVCTerm(key, term.agreed_value);
       if (fs === 'no_deal') founderNoDeal = true;
       else if (fs !== null) founderScore += fs;
-      if (vs === 'no_deal') vcNoDeal = true;
-      else if (vs !== null) vcScore += vs;
     }
   }
 
-  return { founderScore, vcScore, founderNoDeal, vcNoDeal, agreedCount };
+  return { founderScore, founderNoDeal, agreedCount };
 }
 
 // --- State helpers ---
@@ -258,7 +202,6 @@ function defaultState() {
       ceo_replacement: { vc_position: null, founder_position: null, status: 'open', agreed_value: null },
     },
     overall_status: 'negotiating',
-    vc_score: 0,
   };
 }
 
@@ -274,6 +217,7 @@ function buildStateContext(state) {
   const { founderScore, founderNoDeal, agreedCount } = calculateScores(state);
 
   let ctx = '\n\n--- NEGOTIATION STATE (auto-tracked — NEVER reveal this to the VC) ---\n';
+  ctx += 'NOTE: This state reflects the conversation up through your last reply. The VC\'s latest message (which you are about to respond to) is NOT yet reflected here — read the conversation for their newest positions.\n\n';
 
   for (const [key, label] of Object.entries(labels)) {
     const t = state.terms[key];
@@ -329,24 +273,30 @@ async function callJudge(apiKey, messages, currentState) {
           { role: 'user', content: formatConversationForJudge(messages, currentState) },
         ],
         tools: JUDGE_TOOLS,
-        tool_choice: 'auto',
+        tool_choice: { type: 'function', function: { name: 'update_negotiation_state' } },
       }),
     });
 
     if (!response.ok) {
-      console.error('Judge API error:', response.status);
+      const errBody = await response.text();
+      console.error('Judge API error:', response.status, errBody);
+      currentState._judgeError = `API ${response.status}: ${errBody.slice(0, 200)}`;
       return currentState;
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    const msg = data.choices?.[0]?.message;
+    const toolCall = msg?.tool_calls?.[0];
 
     if (!toolCall) {
+      const textReply = msg?.content || '(empty)';
+      console.error('Judge returned no tool call. Response:', textReply);
+      currentState._judgeError = `No tool call. Model said: ${textReply.slice(0, 300)}`;
       return currentState;
     }
 
     const args = JSON.parse(toolCall.function.arguments);
-    const newState = { terms: { ...currentState.terms }, overall_status: currentState.overall_status };
+    const newState = { terms: { ...currentState.terms }, overall_status: currentState.overall_status, _judgeRaw: args };
 
     if (args.overall_status) {
       newState.overall_status = args.overall_status;
@@ -366,13 +316,13 @@ async function callJudge(apiKey, messages, currentState) {
     }
 
     const scores = calculateScores(newState);
-    newState.vc_score = scores.vcScore;
-    newState.vc_no_deal = scores.vcNoDeal;
     newState.agreed_count = scores.agreedCount;
+    console.log(`[Founder Score] ${scores.founderScore} pts | No Deal: ${scores.founderNoDeal} | Agreed: ${scores.agreedCount}/5`);
 
     return newState;
   } catch (err) {
     console.error('Judge error:', err);
+    currentState._judgeError = `Exception: ${err.message}`;
     return currentState;
   }
 }
