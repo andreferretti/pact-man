@@ -95,10 +95,6 @@ The AI founder has its own secret scoring — the points are different from your
 
 After every message exchange, a separate **AI judge** (also Grok LLM, using tool calls) reads the full conversation and extracts the current state of each term — what each side has proposed, and whether there's a tentative agreement. This keeps the Deal Tracker sidebar in sync with the conversation without relying on the founder agent to self-report accurately.
 
-## API Keys
-
-The `.env` file containing OpenRouter API keys is committed to this public repo. This is intentional — the repo had to be public for the challenge submission, and we didn't want to force reviewers to sign up for OpenRouter and configure their own keys just to try the app. The keys have a **$5 credit limit**, so even if someone grabs them, the exposure is minimal.
-
 ## Stack
 
 - **Frontend:** Plain HTML/CSS/JS — no framework, no build step
