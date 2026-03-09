@@ -35,10 +35,18 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Serve index.html for everything else
-  fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
+  // Serve static files
+  const filePath = req.url === '/' ? '/index.html' : req.url;
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeTypes = {
+    '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon',
+    '.svg': 'image/svg+xml', '.gif': 'image/gif', '.webp': 'image/webp',
+  };
+  const fullPath = path.join(__dirname, filePath);
+  fs.readFile(fullPath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
     res.end(data);
   });
 });

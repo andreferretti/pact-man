@@ -25,7 +25,9 @@
       color: white;
       padding: 22px 24px;
     }
+    header > div { display: flex; align-items: center; gap: 12px; }
     header h1 { font-size: 32px; font-weight: 300; text-transform: uppercase; letter-spacing: 0.03em; }
+    header .logo { height: 36px; transform: translateY(1px); }
 
     /* -- Main layout -- */
     .main {
@@ -54,7 +56,7 @@
 
     /* -- Sidebar -- */
     .sidebar {
-      width: 400px;
+      width: 340px;
       flex-shrink: 0;
       background: #F3F4F5;
       border-left: 1px solid #e0e2e4;
@@ -87,10 +89,13 @@
       border-bottom: 1px solid rgba(125,151,165,0.08);
       vertical-align: middle;
     }
+    .sidebar td, .sidebar th { text-align: center; }
+    .sidebar td:first-child, .sidebar th:first-child { text-align: center; }
     .sidebar .term-header td {
-      padding-top: 12px;
+      padding-top: 18px;
       font-weight: 600;
       color: #D09047;
+      text-align: center;
     }
     .sidebar .no-deal {
       color: #e05555;
@@ -376,6 +381,7 @@
   <header>
     <div>
       <h1>Pact-Man</h1>
+      <img src="/images/logo.png" alt="Pact-Man logo" class="logo">
     </div>
   </header>
 
@@ -399,8 +405,7 @@
         <span><span class="pos-dot agreed active" style="opacity:1"></span> Agreed</span>
       </div>
       <table id="scoreSheet">
-        <tr><th></th><th>Option</th><th>Points</th></tr>
-        <tr class="term-header"><td colspan="3">#1: VC Equity %</td></tr>
+        <tr class="term-header"><td></td><td>VC Equity %</td><td></td></tr>
         <tr data-term="vc_equity_percentage" data-match="25_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>25% or less</td><td class="no-deal">No Deal</td></tr>
         <tr data-term="vc_equity_percentage" data-match="26_34"><td class="dot-cell"><span class="pos-dot"></span></td><td>26 - 34%</td><td>2</td></tr>
         <tr data-term="vc_equity_percentage" data-match="35_39"><td class="dot-cell"><span class="pos-dot"></span></td><td>35 - 39%</td><td>3</td></tr>
@@ -409,23 +414,23 @@
         <tr data-term="vc_equity_percentage" data-match="50"><td class="dot-cell"><span class="pos-dot"></span></td><td>50%</td><td>11</td></tr>
         <tr data-term="vc_equity_percentage" data-match="51_59"><td class="dot-cell"><span class="pos-dot"></span></td><td>51 - 59%</td><td>15</td></tr>
         <tr data-term="vc_equity_percentage" data-match="60_69"><td class="dot-cell"><span class="pos-dot"></span></td><td>60 - 69%</td><td>18</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="70_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>70% or more</td><td>20</td></tr>
-        <tr class="term-header"><td colspan="3">#2: Type of Stock</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="70_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>70% or more</td><td>20</td><td></td></tr>
+        <tr class="term-header"><td></td><td>Type of Stock</td></tr>
         <tr data-term="type_of_stock" data-match="common"><td class="dot-cell"><span class="pos-dot"></span></td><td>Common</td><td>0</td></tr>
         <tr data-term="type_of_stock" data-match="convertible"><td class="dot-cell"><span class="pos-dot"></span></td><td>Convertible Preferred</td><td>8</td></tr>
-        <tr data-term="type_of_stock" data-match="redeemable"><td class="dot-cell"><span class="pos-dot"></span></td><td>Redeemable Preferred</td><td>12</td></tr>
-        <tr class="term-header"><td colspan="3">#3: VC Board Members</td></tr>
+        <tr data-term="type_of_stock" data-match="redeemable"><td class="dot-cell"><span class="pos-dot"></span></td><td>Redeemable Preferred</td><td>12</td><td></td></tr>
+        <tr class="term-header"><td></td><td>VC Board Members</td></tr>
         <tr data-term="vc_board_members" data-match="0"><td class="dot-cell"><span class="pos-dot"></span></td><td>0 members</td><td>0</td></tr>
         <tr data-term="vc_board_members" data-match="1"><td class="dot-cell"><span class="pos-dot"></span></td><td>1 member</td><td>3</td></tr>
         <tr data-term="vc_board_members" data-match="2"><td class="dot-cell"><span class="pos-dot"></span></td><td>2 members</td><td>5</td></tr>
         <tr data-term="vc_board_members" data-match="3"><td class="dot-cell"><span class="pos-dot"></span></td><td>3 members</td><td>7</td></tr>
-        <tr data-term="vc_board_members" data-match="more_than_3"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 3</td><td>10</td></tr>
-        <tr class="term-header"><td colspan="3">#4: Founder Vesting</td></tr>
+        <tr data-term="vc_board_members" data-match="more_than_3"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 3</td><td>10</td><td></td></tr>
+        <tr class="term-header"><td></td><td>Founder Vesting</td></tr>
         <tr data-term="founder_vesting" data-match="less_than_4"><td class="dot-cell"><span class="pos-dot"></span></td><td>Less than 4 years</td><td class="no-deal">No Deal</td></tr>
         <tr data-term="founder_vesting" data-match="4"><td class="dot-cell"><span class="pos-dot"></span></td><td>4 years</td><td>8</td></tr>
         <tr data-term="founder_vesting" data-match="5"><td class="dot-cell"><span class="pos-dot"></span></td><td>5 years</td><td>12</td></tr>
-        <tr data-term="founder_vesting" data-match="more_than_5"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 5 years</td><td>14</td></tr>
-        <tr class="term-header"><td colspan="3">#5: CEO Replacement</td></tr>
+        <tr data-term="founder_vesting" data-match="more_than_5"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 5 years</td><td>14</td><td></td></tr>
+        <tr class="term-header"><td></td><td>CEO Replacement</td><td></td></tr>
         <tr data-term="ceo_replacement" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No provision</td><td class="no-deal">No Deal</td></tr>
         <tr data-term="ceo_replacement" data-match="conservative"><td class="dot-cell"><span class="pos-dot"></span></td><td>Conservative Projections</td><td>6</td></tr>
         <tr data-term="ceo_replacement" data-match="moderate"><td class="dot-cell"><span class="pos-dot"></span></td><td>Moderate Projections</td><td>10</td></tr>
