@@ -8,7 +8,7 @@
 
 ## What is Pact-Man?
 
-Pact-Man is an AI-powered negotiation game. You play as a **Venture Capitalist** proposing term sheets for a Series A investment, while an **AI founder agent** (powered by Gemini 3 Flash via OpenRouter) negotiates back. Both sides are trying to maximize their score across 5 deal terms — but your score sheets are different, so you'll need to figure out where to push and where to concede.
+Pact-Man is an AI-powered negotiation game. You play as a **Venture Capitalist** proposing term sheets for a Series A investment, while an **AI founder agent** (powered by GPT 5.4 via OpenRouter) negotiates back. Both sides are trying to maximize their score across 5 deal terms — but your score sheets are different, so you'll need to figure out where to push and where to concede.
 
 The investment amount is fixed at **$100M** — what you're negotiating is everything else.
 
@@ -91,14 +91,22 @@ The AI founder has its own secret scoring — the points are different from your
 
 </details>
 
+## Founder Negotiation Styles
+
+Before starting, you choose how the AI founder negotiates:
+
+- **Collaborative** — Partnership-oriented. Explores tradeoffs, suggests package deals, makes first concessions to build goodwill. Frames everything as joint problem-solving.
+- **Aggressive** — High-conviction and direct. Anchors with extreme positions, makes small reluctant concessions, uses pressure tactics like competing term sheets. Holds firm under pushback.
+- **Charming** — Charismatic storyteller. Uses humor, anecdotes, and rapport to influence. Makes concessions feel like personal favors and deflects tough demands with warmth before countering.
+
 ## The AI Judge
 
-After every message exchange, a separate **AI judge** (Grok 4.1 Fast, using tool calls) reads the full conversation and extracts the current state of each term — what each side has proposed, and whether there's a tentative agreement. This keeps the Deal Tracker sidebar in sync with the conversation without relying on the founder agent to self-report accurately.
+After every message exchange, a separate **AI judge** (GPT 5.4, using tool calls) reads the full conversation and extracts the current state of each term — what each side has proposed, and whether there's a tentative agreement. This keeps the Deal Tracker sidebar in sync with the conversation without relying on the founder agent to self-report accurately.
 
 ## Stack
 
 - **Frontend:** Plain HTML/CSS/JS — no framework, no build step
 - **Backend:** Vercel serverless function (Node.js) — the founder agent and judge both live in `api/negotiate.js`
-- **LLM:** Gemini 3 Flash (founder agent) + Grok 4.1 Fast (judge) via OpenRouter
+- **LLM:** GPT 5.4 (founder agent + judge) via OpenRouter
 - **Deploy:** Vercel
 

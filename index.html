@@ -379,7 +379,13 @@
     .results-subtitle {
       font-size: 14px;
       opacity: 0.45;
-      margin-bottom: 32px;
+      margin-bottom: 10px;
+    }
+    .results-strategy {
+      font-size: 15px;
+      opacity: 0.6;
+      font-weight: 500;
+      margin-bottom: 8px;
     }
     .results-charts {
       width: 100%;
@@ -581,6 +587,57 @@
       margin: 16px 18px 16px;
     }
 
+    .strategy-picker {
+      margin-top: 24px;
+      margin-bottom: 28px;
+    }
+    .strategy-picker h3 {
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .strategy-cards {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .strategy-card {
+      flex: 1;
+      max-width: 200px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      text-align: center;
+    }
+    .strategy-card:hover {
+      background: rgba(255,255,255,0.08);
+      transform: translateY(-2px);
+    }
+    .strategy-card.selected {
+      border-color: #D09047;
+      background: rgba(208, 144, 71, 0.12);
+    }
+    .strategy-card .strategy-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .strategy-card .strategy-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .strategy-card .strategy-desc {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.4;
+    }
+
     .start-btn {
       display: inline-flex;
       align-items: center;
@@ -608,7 +665,7 @@
     <div class="intro-content">
       <h2>What is Pact-Man?</h2>
       <p>Pact-Man is an AI-powered negotiation game. You play as a <strong>Venture Capitalist</strong> proposing term sheets for a <strong>Series A investment</strong> in a aerospace startup, while an AI founder negotiates back.</p>
-      <p>The investment amount is fixed at <span class="highlight">$100M</span> &mdash; what you're negotiating is everything else. Both sides are trying to maximize their score across <strong>5 deal terms</strong>, but your score sheets are different. You'll need to figure out where to push and where to concede.</p>
+      <p>The investment amount is fixed at <span class="highlight" style="color: #fff">$100M</span> &mdash; what you're negotiating is everything else. Both sides are trying to maximize their score across <strong>5 deal terms</strong>, but your score sheets are different. You'll need to figure out where to push and where to concede.</p>
       <p>Both parties have a <strong>BATNA (walk-away threshold) of 30 points</strong> &mdash; if your final score is below that, you're better off with no deal.</p>
 
       <p>Your score sheet below shows how many points each option is worth to you. No need to memorize it &mdash; you'll have access to it in the sidebar during the negotiation.</p>
@@ -650,8 +707,26 @@
         <div class="intro-note">Some options are "No Deal" for the founder too &mdash; you'll need to discover those during negotiation.</div>
       </details>
 
+      <div class="strategy-picker">
+        <h3>Choose the founder's negotiation style</h3>
+        <div class="strategy-cards">
+          <div class="strategy-card selected" data-strategy="collaborative" onclick="selectStrategy(this)">
+            <div class="strategy-icon">🤝</div>
+            <div class="strategy-name">Collaborative</div>
+          </div>
+          <div class="strategy-card" data-strategy="aggressive" onclick="selectStrategy(this)">
+            <div class="strategy-icon">🔥</div>
+            <div class="strategy-name">Aggressive</div>
+          </div>
+          <div class="strategy-card" data-strategy="charming" onclick="selectStrategy(this)">
+            <div class="strategy-icon">✨</div>
+            <div class="strategy-name">Charming</div>
+          </div>
+        </div>
+      </div>
+
       <div style="text-align:center">
-        <button class="start-btn" onclick="startGame()">Start Negotiation</button>
+        <button class="start-btn" onclick="startGame()">Start</button>
       </div>
     </div>
   </div>
@@ -720,6 +795,7 @@
 
   <div class="results" id="results">
     <h2>Deal Done!</h2>
+    <div class="results-strategy" id="resultsStrategy"></div>
     <div class="results-subtitle">Final scores vs. maximum achievable</div>
     <div class="results-charts">
       <div class="result-chart">
@@ -746,19 +822,49 @@
       </div>
     </div>
     <div class="results-note">Maximums are constrained by both sides reaching their 30-point BATNA</div>
-    <button class="results-back" onclick="goBackToChat()">View conversation</button>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="results-back" onclick="goBackToChat()">View conversation</button>
+      <button class="results-back" onclick="playAgain()">Play again</button>
+    </div>
   </div>
 
 <script>
   let conversationHistory = [];
   let sending = false;
   let negotiationState = null;
+  let selectedStrategy = 'collaborative';
+
+  const STRATEGY_INTROS = {
+    aggressive: "Look, I'll be straight with you — we're the real deal. Two signed payload contracts, a launch window in 18 months, and half the propulsion team from SpaceX. We've got other investors at the table, so let's not waste each other's time. What's your opening offer?",
+    collaborative: "Hey! I'm really excited about the possibility of working together. We've got two payload contracts signed, a launch window in 18 months, and an incredible team of ex-NASA engineers.\n\nI think there's a deal here that works great for both of us. I'm open to discussing equity, stock type, board seats, vesting, and CEO provisions — where would you like to start?",
+    charming: "Hey! Oh man, I've been looking forward to this conversation. You know, when we started this company, people thought we were crazy — an aerospace startup built by a bunch of rocket nerds who couldn't stop talking about orbital mechanics at dinner parties.\n\nBut here we are — two payload contracts, a launch window in 18 months, and frankly the best propulsion team outside of NASA. I'd love to have you along for the ride. What are you thinking for terms?",
+  };
+
+  const STRATEGY_LABELS = {
+    aggressive: 'Aggressive',
+    collaborative: 'Collaborative',
+    charming: 'Charming',
+  };
+
+  function selectStrategy(el) {
+    document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedStrategy = el.dataset.strategy;
+  }
 
   function startGame() {
     document.getElementById('intro').style.display = 'none';
     document.getElementById('gameHeader').style.display = '';
     document.getElementById('gameMain').style.display = 'flex';
     document.getElementById('userInput').focus();
+
+    // Clear default intro and set strategy-specific one
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    conversationHistory = [];
+    const intro = STRATEGY_INTROS[selectedStrategy];
+    addMessage('bot', intro);
+    conversationHistory.push({ role: 'assistant', content: intro });
   }
 
   // Map a free-text position value to a data-match key for a given term
@@ -996,7 +1102,12 @@
       }
     }
 
-    if (hasNoDeal || vcTotal < BATNA || founderTotal < BATNA) return;
+    if (hasNoDeal || vcTotal < BATNA || founderTotal < BATNA) {
+      document.getElementById('userInput').disabled = false;
+      document.getElementById('sendBtn').disabled = false;
+      document.getElementById('userInput').focus();
+      return;
+    }
 
     const combined = vcTotal + founderTotal;
     const VC_MAX = 54, FOUNDER_MAX = 59, TOTAL_MAX = 92;
@@ -1004,6 +1115,7 @@
     document.getElementById('vcResultValue').textContent = vcTotal;
     document.getElementById('founderResultValue').textContent = founderTotal;
     document.getElementById('totalResultValue').textContent = combined;
+    document.getElementById('resultsStrategy').textContent = 'Founder strategy: ' + (STRATEGY_LABELS[selectedStrategy] || selectedStrategy);
     document.getElementById('viewScoresBtn').style.display = 'none';
 
     const mainEl = document.getElementById('gameMain');
@@ -1053,10 +1165,34 @@
     document.getElementById('viewScoresBtn').style.display = '';
   }
 
-  const BOT_INTRO =
-    "Hey! We're raising a Series A for our aerospace startup and I couldn't be more fired up about the mission.\n\n" +
-    "We've got two payload contracts signed, a launch window in 18 months, and a team of ex-NASA engineers.\n\n" +
-    "I'm open to discussing equity split, stock type, board representation, vesting, and CEO provisions. What are you thinking for terms?";
+  function playAgain() {
+    // Reset all state
+    conversationHistory = [];
+    negotiationState = null;
+    sending = false;
+    document.getElementById('chat').innerHTML = '';
+    document.getElementById('userInput').disabled = false;
+    document.getElementById('userInput').value = '';
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('vcScoreDisplay').textContent = '0';
+    document.getElementById('vcScoreDisplay').style.color = '#333';
+    document.getElementById('vcBar').style.width = '0';
+    document.getElementById('founderBar').style.width = '0';
+    document.getElementById('totalBar').style.width = '0';
+    document.querySelectorAll('#scoreSheet .pos-dot').forEach(d => {
+      d.classList.remove('active', 'vc', 'founder', 'agreed', 'loading');
+    });
+    document.querySelectorAll('#scoreSheet tr.agreed-row').forEach(r => r.classList.remove('agreed-row'));
+
+    // Hide results and game, show intro
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('gameMain').style.display = 'none';
+    document.getElementById('gameMain').classList.remove('fade-out');
+    document.getElementById('gameHeader').style.display = 'none';
+    document.getElementById('viewScoresBtn').style.display = 'none';
+    document.getElementById('intro').style.display = '';
+  }
+
 
   // -- Helpers --
 
@@ -1159,7 +1295,7 @@
       const res = await fetch('/api/negotiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory, state: negotiationState }),
+        body: JSON.stringify({ messages: conversationHistory, state: negotiationState, strategy: selectedStrategy }),
       });
       const data = await res.json();
       hideTyping();
@@ -1202,9 +1338,6 @@
   }
 
   // -- Init --
-  addMessage('bot', BOT_INTRO);
-  conversationHistory.push({ role: 'assistant', content: BOT_INTRO });
-
   if (new URLSearchParams(location.search).has('skip-intro')) {
     startGame();
   }

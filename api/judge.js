@@ -91,7 +91,7 @@ async function callJudge(apiKey, messages, currentState) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'x-ai/grok-4.1-fast',
+        model: 'openai/gpt-5.4',
         messages: [
           { role: 'system', content: JUDGE_SYSTEM_PROMPT },
           { role: 'user', content: formatConversationForJudge(messages, currentState) },

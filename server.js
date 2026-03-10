@@ -14,6 +14,8 @@ if (fs.existsSync(envPath)) {
 
 const handler = require('./api/negotiate');
 const judgeHandler = require('./api/judge');
+let testNegotiateHandler;
+try { testNegotiateHandler = require('./api/test-negotiate'); } catch {}
 
 const PORT = 3000;
 
@@ -26,8 +28,8 @@ function makeRes(raw) {
 }
 
 const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && (req.url === '/api/negotiate' || req.url === '/api/judge')) {
-    const h = req.url === '/api/judge' ? judgeHandler : handler;
+  if (req.method === 'POST' && (req.url === '/api/negotiate' || req.url === '/api/judge' || req.url === '/api/test-negotiate')) {
+    const h = req.url === '/api/judge' ? judgeHandler : req.url === '/api/test-negotiate' ? testNegotiateHandler : handler;
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
@@ -39,7 +41,7 @@ const server = http.createServer((req, res) => {
 
   // Serve static files
   const pathname = req.url.split('?')[0];
-  const filePath = pathname === '/' ? '/index.html' : pathname;
+  const filePath = pathname === '/' ? '/index.html' : pathname.endsWith('/') ? pathname + 'index.html' : pathname;
   const ext = path.extname(filePath).toLowerCase();
   const mimeTypes = {
     '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
