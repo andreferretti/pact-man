@@ -29,6 +29,20 @@
     header h1 { font-size: 32px; font-weight: 300; text-transform: uppercase; letter-spacing: 0.03em; }
     header .logo { height: 37px; }
 
+    .view-scores-btn {
+      margin-left: auto;
+      background: #D09047;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .view-scores-btn:hover { background: #b87a38; }
+
     /* -- Main layout -- */
     .main {
       flex: 1;
@@ -647,6 +661,7 @@
     <div>
       <h1>Pact-Man</h1>
       <img src="/images/logo.png" alt="Pact-Man logo" class="logo">
+      <button class="view-scores-btn" id="viewScoresBtn" style="display:none" onclick="showResults(true)">View Scores</button>
     </div>
   </header>
 
@@ -1000,6 +1015,7 @@
     document.getElementById('vcResultValue').textContent = vcTotal;
     document.getElementById('founderResultValue').textContent = founderTotal;
     document.getElementById('totalResultValue').textContent = combined;
+    document.getElementById('viewScoresBtn').style.display = 'none';
 
     const mainEl = document.getElementById('gameMain');
     const fadeDelay = skipFade ? 0 : 500;
@@ -1045,6 +1061,7 @@
     const mainEl = document.getElementById('gameMain');
     mainEl.classList.remove('fade-out');
     mainEl.style.display = 'flex';
+    document.getElementById('viewScoresBtn').style.display = '';
   }
 
   const BOT_INTRO =

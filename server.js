@@ -38,7 +38,8 @@ const server = http.createServer((req, res) => {
   }
 
   // Serve static files
-  const filePath = req.url === '/' ? '/index.html' : req.url;
+  const pathname = req.url.split('?')[0];
+  const filePath = pathname === '/' ? '/index.html' : pathname;
   const ext = path.extname(filePath).toLowerCase();
   const mimeTypes = {
     '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
