@@ -71,7 +71,7 @@ const JUDGE_TOOLS = [{
 function formatConversationForJudge(messages, previousState) {
   let text = 'NEGOTIATION TRANSCRIPT:\n\n';
   for (const msg of messages) {
-    const speaker = msg.role === 'user' ? 'VC Investor' : 'Founder';
+    const speaker = msg.role === 'user' ? 'Founder' : 'VC Investor';
     text += `${speaker}: ${msg.content}\n\n`;
   }
 

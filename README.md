@@ -8,7 +8,7 @@
 
 ## What is Pact-Man?
 
-Pact-Man is an AI-powered negotiation game. You play as a **Venture Capitalist** proposing term sheets for a Series A investment, while an **AI founder agent** (powered by GPT 5.4 via OpenRouter) negotiates back. Both sides are trying to maximize their score across 5 deal terms — but your score sheets are different, so you'll need to figure out where to push and where to concede.
+Pact-Man is an AI-powered negotiation game. You play as a **Startup Founder** seeking Series A funding, while an **AI VC investor agent** (powered by GPT 5.4 via OpenRouter) negotiates back. Both sides are trying to maximize their score across 5 deal terms — but your score sheets are different, so you'll need to figure out where to push and where to concede.
 
 The investment amount is fixed at **$100M** — what you're negotiating is everything else.
 
@@ -26,7 +26,40 @@ Each term has discrete options worth different points to each side. Both parties
 
 Some options are **No Deal** for one side, meaning the other party will never accept them.
 
+### Founder Score Sheet
+
+| Term | Options | Points |
+| :--- | :--- | :--- |
+| **#1: VC Equity Percentage** | 60% or more: | **No Deal** |
+| | 56% to 59%: | 4 |
+| | 50% to 55%: | 8 |
+| | 47% to 49%: | 16 |
+| | 42% to 46%: | 18 |
+| | 36% to 41%: | 20 |
+| | 31% to 35%: | 22 |
+| | 30% or less: | 24 |
+| **#2: Type of Stock** | Redeemable Preferred: | 2 |
+| | Convertible Preferred: | 5 |
+| | Common: | 6 |
+| **#3: VC Appointed Board Members** | More than 2 members: | **No Deal** |
+| | 2 members: | 6 |
+| | 1 member: | 8 |
+| | 0 members: | 2 |
+| **#4: Vesting of Founder's Shares** | 6 or more years: | 3 |
+| | 4 or 5 years: | 8 |
+| | 3 or less years: | 10 |
+| | No vesting: | 12 |
+| **#5: CEO Replacement Provision** | Aggressive Projections: | **No Deal** |
+| | Moderate Projections: | 7 |
+| | Conservative Projections: | 14 |
+| | No provision: | 19 |
+
 ### VC Score Sheet
+
+The AI VC has its own secret scoring — the points are different from yours, which is what makes the negotiation interesting. Revealed here for reference.
+
+<details>
+<summary><b>View VC score sheet</b></summary>
 
 | Term | Options | Points |
 | :--- | :--- | :--- |
@@ -56,57 +89,24 @@ Some options are **No Deal** for one side, meaning the other party will never ac
 | | Moderate Projections: | 10 |
 | | Aggressive Projections: | 16 |
 
-### Founder Score Sheet
-
-The AI founder has its own secret scoring — the points are different from yours, which is what makes the negotiation interesting. Revealed here for reference.
-
-<details>
-<summary><b>View founder score sheet</b></summary>
-
-| Term | Options | Points |
-| :--- | :--- | :--- |
-| **#1: VC Equity Percentage** | 60% or more: | **No Deal** |
-| | 56% to 59%: | 4 |
-| | 50% to 55%: | 8 |
-| | 47% to 49%: | 16 |
-| | 42% to 46%: | 18 |
-| | 36% to 41%: | 20 |
-| | 31% to 35%: | 22 |
-| | 30% or less: | 24 |
-| **#2: Type of Stock** | Redeemable Preferred: | 2 |
-| | Convertible Preferred: | 5 |
-| | Common: | 6 |
-| **#3: VC Appointed Board Members** | More than 2 members: | **No Deal** |
-| | 2 members: | 6 |
-| | 1 member: | 8 |
-| | 0 members: | 2 |
-| **#4: Vesting of Founder's Shares** | 6 or more years: | 3 |
-| | 4 or 5 years: | 8 |
-| | 3 or less years: | 10 |
-| | No vesting: | 12 |
-| **#5: CEO Replacement Provision** | Aggressive Projections: | **No Deal** |
-| | Moderate Projections: | 7 |
-| | Conservative Projections: | 14 |
-| | No provision: | 19 |
-
 </details>
 
-## Founder Negotiation Styles
+## VC Negotiation Styles
 
-Before starting, you choose how the AI founder negotiates:
+Before starting, you choose how the AI VC negotiates:
 
 - **Collaborative** — Partnership-oriented. Explores tradeoffs, suggests package deals, makes first concessions to build goodwill. Frames everything as joint problem-solving.
-- **Aggressive** — High-conviction and direct. Anchors with extreme positions, makes small reluctant concessions, uses pressure tactics like competing term sheets. Holds firm under pushback.
-- **Charming** — Charismatic storyteller. Uses humor, anecdotes, and rapport to influence. Makes concessions feel like personal favors and deflects tough demands with warmth before countering.
+- **Aggressive** — Tough and demanding. Anchors with aggressive terms, makes small reluctant concessions, uses leverage like deal flow and market risk. Holds firm under pushback.
+- **Charming** — Charismatic dealmaker. Uses humor, portfolio stories, and rapport to influence. Makes concessions feel like personal gestures and deflects tough demands with warmth before countering.
 
 ## The AI Judge
 
-After every message exchange, a separate **AI judge** (GPT 5.4, using tool calls) reads the full conversation and extracts the current state of each term — what each side has proposed, and whether there's a tentative agreement. This keeps the Deal Tracker sidebar in sync with the conversation without relying on the founder agent to self-report accurately.
+After every message exchange, a separate **AI judge** (GPT 5.4, using tool calls) reads the full conversation and extracts the current state of each term — what each side has proposed, and whether there's a tentative agreement. This keeps the Deal Tracker sidebar in sync with the conversation without relying on the VC agent to self-report accurately.
 
 ## Stack
 
 - **Frontend:** Plain HTML/CSS/JS — no framework, no build step
-- **Backend:** Vercel serverless function (Node.js) — the founder agent and judge both live in `api/negotiate.js`
-- **LLM:** GPT 5.4 (founder agent + judge) via OpenRouter
+- **Backend:** Vercel serverless function (Node.js) — the VC agent and judge live in `api/`
+- **LLM:** GPT 5.4 (VC agent + judge) via OpenRouter
 - **Deploy:** Vercel
 

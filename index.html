@@ -664,7 +664,7 @@
     <img src="/images/logo.png" alt="Pact-Man" class="intro-banner">
     <div class="intro-content">
       <h2>What is Pact-Man?</h2>
-      <p>Pact-Man is an AI-powered negotiation game. You play as a <strong>Venture Capitalist</strong> proposing term sheets for a <strong>Series A investment</strong> in a aerospace startup, while an AI founder negotiates back.</p>
+      <p>Pact-Man is an AI-powered negotiation game. You play as a <strong>Startup Founder</strong> seeking <strong>Series A funding</strong> from an AI venture capitalist who negotiates back.</p>
       <p>The investment amount is fixed at <span class="highlight" style="color: #fff">$100M</span> &mdash; what you're negotiating is everything else. Both sides are trying to maximize their score across <strong>5 deal terms</strong>, but your score sheets are different. You'll need to figure out where to push and where to concede.</p>
       <p>Both parties have a <strong>BATNA (walk-away threshold) of 30 points</strong> &mdash; if your final score is below that, you're better off with no deal.</p>
 
@@ -674,41 +674,39 @@
         <table class="intro-table">
           <tr><th>Option</th><th>Points</th></tr>
           <tr class="term-header-row"><td colspan="2">#1: VC Equity Percentage</td></tr>
-          <tr><td>25% or less</td><td class="no-deal-cell">No Deal</td></tr>
-          <tr><td>26 - 34%</td><td>2</td></tr>
-          <tr><td>35 - 39%</td><td>3</td></tr>
-          <tr><td>40 - 45%</td><td>6</td></tr>
-          <tr><td>46 - 49%</td><td>9</td></tr>
-          <tr><td>50%</td><td>11</td></tr>
-          <tr><td>51 - 59%</td><td>15</td></tr>
-          <tr><td>60 - 69%</td><td>18</td></tr>
-          <tr><td>70% or more</td><td>20</td></tr>
+          <tr><td>30% or less</td><td>24</td></tr>
+          <tr><td>31 - 35%</td><td>22</td></tr>
+          <tr><td>36 - 41%</td><td>20</td></tr>
+          <tr><td>42 - 46%</td><td>18</td></tr>
+          <tr><td>47 - 49%</td><td>16</td></tr>
+          <tr><td>50 - 55%</td><td>8</td></tr>
+          <tr><td>56 - 59%</td><td>4</td></tr>
+          <tr><td>60% or more</td><td class="no-deal-cell">No Deal</td></tr>
           <tr class="term-header-row"><td colspan="2">#2: Type of Stock</td></tr>
-          <tr><td>Common</td><td>0</td></tr>
-          <tr><td>Convertible Preferred</td><td>8</td></tr>
-          <tr><td>Redeemable Preferred</td><td>12</td></tr>
+          <tr><td>Common</td><td>6</td></tr>
+          <tr><td>Convertible Preferred</td><td>5</td></tr>
+          <tr><td>Redeemable Preferred</td><td>2</td></tr>
           <tr class="term-header-row"><td colspan="2">#3: VC Appointed Board Members</td></tr>
-          <tr><td>0 members</td><td>0</td></tr>
-          <tr><td>1 member</td><td>3</td></tr>
-          <tr><td>2 members</td><td>5</td></tr>
-          <tr><td>3 members</td><td>7</td></tr>
-          <tr><td>More than 3</td><td>10</td></tr>
+          <tr><td>0 members</td><td>2</td></tr>
+          <tr><td>1 member</td><td>8</td></tr>
+          <tr><td>2 members</td><td>6</td></tr>
+          <tr><td>More than 2</td><td class="no-deal-cell">No Deal</td></tr>
           <tr class="term-header-row"><td colspan="2">#4: Vesting of Founder's Shares</td></tr>
-          <tr><td>Less than 4 years</td><td class="no-deal-cell">No Deal</td></tr>
-          <tr><td>4 years</td><td>8</td></tr>
-          <tr><td>5 years</td><td>12</td></tr>
-          <tr><td>More than 5 years</td><td>14</td></tr>
+          <tr><td>No vesting</td><td>12</td></tr>
+          <tr><td>3 years or less</td><td>10</td></tr>
+          <tr><td>4 or 5 years</td><td>8</td></tr>
+          <tr><td>6 or more years</td><td>3</td></tr>
           <tr class="term-header-row"><td colspan="2">#5: CEO Replacement Provision</td></tr>
-          <tr><td>No provision</td><td class="no-deal-cell">No Deal</td></tr>
-          <tr><td>Conservative Projections</td><td>6</td></tr>
-          <tr><td>Moderate Projections</td><td>10</td></tr>
-          <tr><td>Aggressive Projections</td><td>16</td></tr>
+          <tr><td>No provision</td><td>19</td></tr>
+          <tr><td>Conservative Projections</td><td>14</td></tr>
+          <tr><td>Moderate Projections</td><td>7</td></tr>
+          <tr><td>Aggressive Projections</td><td class="no-deal-cell">No Deal</td></tr>
         </table>
-        <div class="intro-note">Some options are "No Deal" for the founder too &mdash; you'll need to discover those during negotiation.</div>
+        <div class="intro-note">Some options are "No Deal" for the VC too &mdash; you'll need to discover those during negotiation.</div>
       </details>
 
       <div class="strategy-picker">
-        <h3>Choose the founder's negotiation style</h3>
+        <h3>Choose the VC's negotiation style</h3>
         <div class="strategy-cards">
           <div class="strategy-card selected" data-strategy="collaborative" onclick="selectStrategy(this)">
             <div class="strategy-icon">🤝</div>
@@ -754,42 +752,40 @@
 
     <div class="sidebar">
       <div class="legend">
-        <span><span class="pos-dot vc active" style="opacity:1"></span> Your position</span>
-        <span><span class="pos-dot founder active" style="opacity:1"></span> Founder position</span>
+        <span><span class="pos-dot founder active" style="opacity:1"></span> Your position</span>
+        <span><span class="pos-dot vc active" style="opacity:1"></span> VC position</span>
       </div>
       <table id="scoreSheet">
         <tr class="term-header"><td></td><td>VC Equity %</td><td></td></tr>
-        <tr data-term="vc_equity_percentage" data-match="25_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>25% or less</td><td class="no-deal">No Deal</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="26_34"><td class="dot-cell"><span class="pos-dot"></span></td><td>26 - 34%</td><td>2</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="35_39"><td class="dot-cell"><span class="pos-dot"></span></td><td>35 - 39%</td><td>3</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="40_45"><td class="dot-cell"><span class="pos-dot"></span></td><td>40 - 45%</td><td>6</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="46_49"><td class="dot-cell"><span class="pos-dot"></span></td><td>46 - 49%</td><td>9</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="50"><td class="dot-cell"><span class="pos-dot"></span></td><td>50%</td><td>11</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="51_59"><td class="dot-cell"><span class="pos-dot"></span></td><td>51 - 59%</td><td>15</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="60_69"><td class="dot-cell"><span class="pos-dot"></span></td><td>60 - 69%</td><td>18</td></tr>
-        <tr data-term="vc_equity_percentage" data-match="70_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>70% or more</td><td>20</td><td></td></tr>
+        <tr data-term="vc_equity_percentage" data-match="30_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>30% or less</td><td>24</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="31_35"><td class="dot-cell"><span class="pos-dot"></span></td><td>31 - 35%</td><td>22</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="36_41"><td class="dot-cell"><span class="pos-dot"></span></td><td>36 - 41%</td><td>20</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="42_46"><td class="dot-cell"><span class="pos-dot"></span></td><td>42 - 46%</td><td>18</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="47_49"><td class="dot-cell"><span class="pos-dot"></span></td><td>47 - 49%</td><td>16</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="50_55"><td class="dot-cell"><span class="pos-dot"></span></td><td>50 - 55%</td><td>8</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="56_59"><td class="dot-cell"><span class="pos-dot"></span></td><td>56 - 59%</td><td>4</td></tr>
+        <tr data-term="vc_equity_percentage" data-match="60_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>60% or more</td><td class="no-deal">No Deal</td></tr>
         <tr class="term-header"><td></td><td>Type of Stock</td></tr>
-        <tr data-term="type_of_stock" data-match="common"><td class="dot-cell"><span class="pos-dot"></span></td><td>Common</td><td>0</td></tr>
-        <tr data-term="type_of_stock" data-match="convertible"><td class="dot-cell"><span class="pos-dot"></span></td><td>Convertible Preferred</td><td>8</td></tr>
-        <tr data-term="type_of_stock" data-match="redeemable"><td class="dot-cell"><span class="pos-dot"></span></td><td>Redeemable Preferred</td><td>12</td><td></td></tr>
+        <tr data-term="type_of_stock" data-match="common"><td class="dot-cell"><span class="pos-dot"></span></td><td>Common</td><td>6</td></tr>
+        <tr data-term="type_of_stock" data-match="convertible"><td class="dot-cell"><span class="pos-dot"></span></td><td>Convertible Preferred</td><td>5</td></tr>
+        <tr data-term="type_of_stock" data-match="redeemable"><td class="dot-cell"><span class="pos-dot"></span></td><td>Redeemable Preferred</td><td>2</td></tr>
         <tr class="term-header"><td></td><td>VC Board Members</td></tr>
-        <tr data-term="vc_board_members" data-match="0"><td class="dot-cell"><span class="pos-dot"></span></td><td>0 members</td><td>0</td></tr>
-        <tr data-term="vc_board_members" data-match="1"><td class="dot-cell"><span class="pos-dot"></span></td><td>1 member</td><td>3</td></tr>
-        <tr data-term="vc_board_members" data-match="2"><td class="dot-cell"><span class="pos-dot"></span></td><td>2 members</td><td>5</td></tr>
-        <tr data-term="vc_board_members" data-match="3"><td class="dot-cell"><span class="pos-dot"></span></td><td>3 members</td><td>7</td></tr>
-        <tr data-term="vc_board_members" data-match="more_than_3"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 3</td><td>10</td><td></td></tr>
+        <tr data-term="vc_board_members" data-match="0"><td class="dot-cell"><span class="pos-dot"></span></td><td>0 members</td><td>2</td></tr>
+        <tr data-term="vc_board_members" data-match="1"><td class="dot-cell"><span class="pos-dot"></span></td><td>1 member</td><td>8</td></tr>
+        <tr data-term="vc_board_members" data-match="2"><td class="dot-cell"><span class="pos-dot"></span></td><td>2 members</td><td>6</td></tr>
+        <tr data-term="vc_board_members" data-match="more_than_2"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 2</td><td class="no-deal">No Deal</td></tr>
         <tr class="term-header"><td></td><td>Founder Vesting</td></tr>
-        <tr data-term="founder_vesting" data-match="less_than_4"><td class="dot-cell"><span class="pos-dot"></span></td><td>Less than 4 years</td><td class="no-deal">No Deal</td></tr>
-        <tr data-term="founder_vesting" data-match="4"><td class="dot-cell"><span class="pos-dot"></span></td><td>4 years</td><td>8</td></tr>
-        <tr data-term="founder_vesting" data-match="5"><td class="dot-cell"><span class="pos-dot"></span></td><td>5 years</td><td>12</td></tr>
-        <tr data-term="founder_vesting" data-match="more_than_5"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 5 years</td><td>14</td><td></td></tr>
+        <tr data-term="founder_vesting" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No vesting</td><td>12</td></tr>
+        <tr data-term="founder_vesting" data-match="3_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>3 years or less</td><td>10</td></tr>
+        <tr data-term="founder_vesting" data-match="4_5"><td class="dot-cell"><span class="pos-dot"></span></td><td>4 or 5 years</td><td>8</td></tr>
+        <tr data-term="founder_vesting" data-match="6_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>6 or more years</td><td>3</td></tr>
         <tr class="term-header"><td></td><td>CEO Replacement</td><td></td></tr>
-        <tr data-term="ceo_replacement" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No provision</td><td class="no-deal">No Deal</td></tr>
-        <tr data-term="ceo_replacement" data-match="conservative"><td class="dot-cell"><span class="pos-dot"></span></td><td>Conservative Projections</td><td>6</td></tr>
-        <tr data-term="ceo_replacement" data-match="moderate"><td class="dot-cell"><span class="pos-dot"></span></td><td>Moderate Projections</td><td>10</td></tr>
-        <tr data-term="ceo_replacement" data-match="aggressive"><td class="dot-cell"><span class="pos-dot"></span></td><td>Aggressive Projections</td><td>16</td></tr>
+        <tr data-term="ceo_replacement" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No provision</td><td>19</td></tr>
+        <tr data-term="ceo_replacement" data-match="conservative"><td class="dot-cell"><span class="pos-dot"></span></td><td>Conservative Projections</td><td>14</td></tr>
+        <tr data-term="ceo_replacement" data-match="moderate"><td class="dot-cell"><span class="pos-dot"></span></td><td>Moderate Projections</td><td>7</td></tr>
+        <tr data-term="ceo_replacement" data-match="aggressive"><td class="dot-cell"><span class="pos-dot"></span></td><td>Aggressive Projections</td><td class="no-deal">No Deal</td></tr>
       </table>
-      <div class="tracker-score-bar">Your Score: <span id="vcScoreDisplay">0</span> pts / 30</div>
+      <div class="tracker-score-bar">Your Score: <span id="founderScoreDisplay">0</span> pts / 30</div>
     </div>
   </div>
 
@@ -800,17 +796,17 @@
     <div class="results-charts">
       <div class="result-chart">
         <div class="chart-label">
-          <span>VC (You)</span>
-          <span class="pts"><span id="vcResultValue">0</span> <span class="pts-max">/ 54</span></span>
-        </div>
-        <div class="chart-track"><div class="chart-fill vc" id="vcBar"></div></div>
-      </div>
-      <div class="result-chart">
-        <div class="chart-label">
-          <span>Founder</span>
+          <span>Founder (You)</span>
           <span class="pts"><span id="founderResultValue">0</span> <span class="pts-max">/ 59</span></span>
         </div>
         <div class="chart-track"><div class="chart-fill founder" id="founderBar"></div></div>
+      </div>
+      <div class="result-chart">
+        <div class="chart-label">
+          <span>VC</span>
+          <span class="pts"><span id="vcResultValue">0</span> <span class="pts-max">/ 54</span></span>
+        </div>
+        <div class="chart-track"><div class="chart-fill vc" id="vcBar"></div></div>
       </div>
       <div class="results-divider"></div>
       <div class="result-chart total-chart">
@@ -835,9 +831,9 @@
   let selectedStrategy = 'collaborative';
 
   const STRATEGY_INTROS = {
-    aggressive: "Look, I'll be straight with you — we're the real deal. Two signed payload contracts, a launch window in 18 months, and half the propulsion team from SpaceX. We've got other investors at the table, so let's not waste each other's time. What's your opening offer?",
-    collaborative: "Hey! I'm really excited about the possibility of working together. We've got two payload contracts signed, a launch window in 18 months, and an incredible team of ex-NASA engineers.\n\nI think there's a deal here that works great for both of us. I'm open to discussing equity, stock type, board seats, vesting, and CEO provisions — where would you like to start?",
-    charming: "Hey! Oh man, I've been looking forward to this conversation. You know, when we started this company, people thought we were crazy — an aerospace startup built by a bunch of rocket nerds who couldn't stop talking about orbital mechanics at dinner parties.\n\nBut here we are — two payload contracts, a launch window in 18 months, and frankly the best propulsion team outside of NASA. I'd love to have you along for the ride. What are you thinking for terms?",
+    aggressive: "I'll be straight with you — I've reviewed your deck and the numbers are interesting, but my fund sees 500 deals a year and we invest in maybe ten. We don't do friendly terms. What are you proposing?",
+    collaborative: "Thanks for walking me through the pitch — I'm genuinely impressed with what you've built. The signed contracts and the team you've put together? That's exactly the kind of traction we look for.\n\nI think there's a deal here that works great for both of us. I'm open to discussing equity, stock type, board seats, vesting, and CEO provisions — what matters most to you?",
+    charming: "I have to tell you — your pitch was easily the most exciting thing I've seen this quarter. My partner literally texted me 'this is the one' halfway through your deck.\n\nLook, I want to make this happen. Let's figure out terms that work. What's on your mind?",
   };
 
   const STRATEGY_LABELS = {
@@ -874,10 +870,10 @@
       case 'vc_equity_percentage': {
         const p = parseFloat(value);
         if (isNaN(p)) return null;
-        if (p <= 25) return '25_or_less';
-        if (p <= 34) return '26_34'; if (p <= 39) return '35_39'; if (p <= 45) return '40_45';
-        if (p <= 49) return '46_49'; if (p === 50) return '50'; if (p <= 59) return '51_59';
-        if (p <= 69) return '60_69'; return '70_plus';
+        if (p <= 30) return '30_or_less';
+        if (p <= 35) return '31_35'; if (p <= 41) return '36_41'; if (p <= 46) return '42_46';
+        if (p <= 49) return '47_49'; if (p <= 55) return '50_55'; if (p <= 59) return '56_59';
+        return '60_plus';
       }
       case 'type_of_stock': {
         const v = value.toLowerCase();
@@ -890,18 +886,18 @@
         const n = parseInt(value);
         if (isNaN(n)) return null;
         if (n === 0) return '0'; if (n === 1) return '1'; if (n === 2) return '2';
-        if (n === 3) return '3'; return 'more_than_3';
+        return 'more_than_2';
       }
       case 'founder_vesting': {
         const v = value.toLowerCase();
-        if (v === 'none' || v === 'no vesting' || v === '0') return 'less_than_4';
-        if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 'more_than_5';
-        if (v.includes('less than 4') || v.includes('under 4')) return 'less_than_4';
+        if (v === 'none' || v === 'no vesting' || v === '0') return 'none';
+        if (v.includes('6 or more') || v.includes('more than 5') || v.includes('over 5')) return '6_plus';
+        if (v.includes('less than 4') || v.includes('under 4') || v.includes('3 or less')) return '3_or_less';
         const ym = value.match(/\d+/);
         const y = ym ? parseFloat(ym[0]) : NaN;
         if (isNaN(y)) return null;
-        if (y < 4) return 'less_than_4'; if (y === 4) return '4'; if (y === 5) return '5';
-        return 'more_than_5';
+        if (y >= 6) return '6_plus'; if (y >= 4) return '4_5'; if (y <= 3) return '3_or_less';
+        return null;
       }
       case 'ceo_replacement': {
         const v = value.toLowerCase();
@@ -971,8 +967,8 @@
     if (!state || !state.terms) return;
 
     const termKeys = ['vc_equity_percentage', 'type_of_stock', 'vc_board_members', 'founder_vesting', 'ceo_replacement'];
-    let vcScore = 0;
-    let vcNoDeal = false;
+    let founderScore = 0;
+    let founderNoDeal = false;
 
     for (const key of termKeys) {
       const t = state.terms[key];
@@ -991,9 +987,9 @@
             });
           }
         }
-        const pts = getVCPoints(key, t.agreed_value);
-        if (pts === 'No Deal') vcNoDeal = true;
-        else if (typeof pts === 'number') vcScore += pts;
+        const pts = getFounderPoints(key, t.agreed_value);
+        if (pts === 'No Deal') founderNoDeal = true;
+        else if (typeof pts === 'number') founderScore += pts;
       } else {
         const vcMatch = t.vc_position ? positionToMatch(key, t.vc_position) : null;
         const founderMatch = t.founder_position ? positionToMatch(key, t.founder_position) : null;
@@ -1005,9 +1001,9 @@
             const dot = row.querySelector('.pos-dot');
             if (dot) dot.classList.add('active', 'agreed');
           }
-          const pts = getVCPoints(key, t.vc_position);
-          if (pts === 'No Deal') vcNoDeal = true;
-          else if (typeof pts === 'number') vcScore += pts;
+          const pts = getFounderPoints(key, t.founder_position);
+          if (pts === 'No Deal') founderNoDeal = true;
+          else if (typeof pts === 'number') founderScore += pts;
         } else {
           if (vcMatch) {
             const row = document.querySelector(`#scoreSheet tr[data-term="${key}"][data-match="${vcMatch}"]`);
@@ -1027,11 +1023,11 @@
       }
     }
 
-    const scoreEl = document.getElementById('vcScoreDisplay');
-    scoreEl.textContent = vcScore;
-    if (vcNoDeal) {
+    const scoreEl = document.getElementById('founderScoreDisplay');
+    scoreEl.textContent = founderScore;
+    if (founderNoDeal) {
       scoreEl.style.color = '#e05555';
-    } else if (vcScore >= 30) {
+    } else if (founderScore >= 30) {
       scoreEl.style.color = '#4CAF50';
     } else {
       scoreEl.style.color = '#333';
@@ -1115,7 +1111,7 @@
     document.getElementById('vcResultValue').textContent = vcTotal;
     document.getElementById('founderResultValue').textContent = founderTotal;
     document.getElementById('totalResultValue').textContent = combined;
-    document.getElementById('resultsStrategy').textContent = 'Founder strategy: ' + (STRATEGY_LABELS[selectedStrategy] || selectedStrategy);
+    document.getElementById('resultsStrategy').textContent = 'VC strategy: ' + (STRATEGY_LABELS[selectedStrategy] || selectedStrategy);
     document.getElementById('viewScoresBtn').style.display = 'none';
 
     const mainEl = document.getElementById('gameMain');
@@ -1134,10 +1130,10 @@
       results.style.animation = 'resultsFadeIn 0.6s ease both';
 
       setTimeout(() => {
-        document.getElementById('vcBar').style.width = (vcTotal / VC_MAX * 100) + '%';
+        document.getElementById('founderBar').style.width = (founderTotal / FOUNDER_MAX * 100) + '%';
       }, 300);
       setTimeout(() => {
-        document.getElementById('founderBar').style.width = (founderTotal / FOUNDER_MAX * 100) + '%';
+        document.getElementById('vcBar').style.width = (vcTotal / VC_MAX * 100) + '%';
       }, 550);
       setTimeout(() => {
         document.getElementById('totalBar').style.width = (combined / TOTAL_MAX * 100) + '%';
@@ -1174,8 +1170,8 @@
     document.getElementById('userInput').disabled = false;
     document.getElementById('userInput').value = '';
     document.getElementById('sendBtn').disabled = false;
-    document.getElementById('vcScoreDisplay').textContent = '0';
-    document.getElementById('vcScoreDisplay').style.color = '#333';
+    document.getElementById('founderScoreDisplay').textContent = '0';
+    document.getElementById('founderScoreDisplay').style.color = '#333';
     document.getElementById('vcBar').style.width = '0';
     document.getElementById('founderBar').style.width = '0';
     document.getElementById('totalBar').style.width = '0';
@@ -1205,7 +1201,7 @@
     if (role === 'bot') {
       const label = document.createElement('div');
       label.className = 'msg-label';
-      label.innerHTML = '<div class="avatar"><i class="icon-rocket"></i></div> Founder';
+      label.innerHTML = '<div class="avatar"><i class="icon-briefcase"></i></div> VC';
       wrapper.appendChild(label);
     }
 
@@ -1248,7 +1244,7 @@
     wrapper.className = 'message bot';
     wrapper.id = 'typing';
     wrapper.innerHTML =
-      '<div class="msg-label"><div class="avatar"><i class="icon-rocket"></i></div> Founder</div>' +
+      '<div class="msg-label"><div class="avatar"><i class="icon-briefcase"></i></div> VC</div>' +
       '<div class="bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
     chat.appendChild(wrapper);
     chat.scrollTop = chat.scrollHeight;
