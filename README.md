@@ -14,16 +14,17 @@ The investment amount is fixed at **$100M** — what you're negotiating is every
 
 ## Run Locally
 
-> **⚠️ You must create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key:**
-> ```
-> OPENROUTER_API_KEY=your-key-here
-> ```
+⚠️ Before running, you must create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key:
+```
+OPENROUTER_API_KEY=your-key-here
+```
 
+Once the API keys are set up, run:
 ```bash
 npm run dev
 ```
 
-Starts at `http://localhost:3000`.
+The project opens automatically at `http://localhost:3000`.
 
 ## Scoring
 
