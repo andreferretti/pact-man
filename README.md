@@ -4,7 +4,7 @@
 
 ## Play Now
 
-**[pact-man-kood.vercel.app](https://pact-man-kood.vercel.app/)**
+**[pact-man.com](https://www.pact-man.com/)**
 
 ## What is Pact-Man?
 
