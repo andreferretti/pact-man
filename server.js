@@ -65,6 +65,18 @@ const server = http.createServer((req, res) => {
   });
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n\x1b[31m❌ Port ${PORT} is already in use.\x1b[0m\n`);
+    console.error(`   Another process is running on port ${PORT}.`);
+    console.error(`   To fix this, either:`);
+    console.error(`     1. Stop the other process: \x1b[33mlsof -ti:${PORT} | xargs kill\x1b[0m`);
+    console.error(`     2. Or close the other terminal running \x1b[33mnpm run dev\x1b[0m\n`);
+    process.exit(1);
+  }
+  throw err;
+});
+
 server.listen(PORT, () => {
   const url = `http://localhost:${PORT}`;
   console.log(`
@@ -76,7 +88,7 @@ server.listen(PORT, () => {
  ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝          ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝\x1b[0m
 
   \x1b[36m🕹️  Running at ${url}\x1b[0m
-`);
+${process.env.OPENROUTER_API_KEY ? '' : '\n  \x1b[31m⚠️  OPENROUTER_API_KEY not found. Create a .env file with:\n     OPENROUTER_API_KEY=your_key_here\x1b[0m\n'}`);
   const open = process.platform === 'win32' ? `start ${url}`
              : process.platform === 'darwin' ? `open ${url}`
              : `xdg-open ${url}`;

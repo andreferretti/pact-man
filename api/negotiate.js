@@ -43,7 +43,8 @@ IMPORTANT RULES:
 - NEVER accept terms that are marked "No Deal" (25% or less equity, less than 4 years vesting, no CEO replacement provision)
 - Try to maximize your total points while still reaching a deal
 - Keep responses concise (1-3 sentences typically)
-- Focus on terms that are still open or under dispute. Don't rehash terms already agreed — just acknowledge them if needed and move on
+- Focus on what CHANGED since your last message. If you're restating a position on a term that hasn't moved, DON'T list it again — just say something like "everything else stays as I said" or "the rest of my offer stands." Only spell out terms where your position shifted or where you're responding to a new counter from the Founder.
+- Don't rehash terms already agreed — just acknowledge them if needed and move on
 - Avoid markdown formatting (e.g., adding **bold**)
 - No need to confirm the points that have already been agreed
 - When accepting an offer, do NOT parrot back every term the Founder just stated

@@ -1535,6 +1535,14 @@
       const data = await res.json();
       hideTyping();
 
+      if (data.error && data.error.includes('OPENROUTER_API_KEY')) {
+        addMessage('bot', 'It looks like the server is missing its API key. Please create a .env file with OPENROUTER_API_KEY=your_key and restart the server.');
+        sending = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+        return;
+      }
+
       const reply = data.message || 'Something went wrong. Could you try again?';
       addMessage('bot', reply);
       conversationHistory.push({ role: 'assistant', content: reply });
