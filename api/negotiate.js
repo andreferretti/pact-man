@@ -277,6 +277,7 @@ async function handler(req, res) {
       body: JSON.stringify({
         model: 'x-ai/grok-4.20-beta',
         temperature: 0,
+        reasoning: { effort: 'medium' },
         messages: [
           { role: 'system', content: vcPrompt },
           ...messages,
@@ -291,6 +292,7 @@ async function handler(req, res) {
     }
 
     const data = await response.json();
+    if (data.usage) console.log('[reasoning: medium]', data.usage.completion_tokens_details?.reasoning_tokens ?? 'n/a', 'tokens');
     const reply = data.choices?.[0]?.message?.content || 'Sorry, I lost my train of thought. Could you repeat that?';
 
     res.status(200).json({ message: reply });
