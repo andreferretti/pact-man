@@ -1,3 +1,5 @@
+const { scoreVCTerm } = require('../shared/game-logic');
+
 const BASE_VC_PROMPT = `You are playing the role of a VC INVESTOR negotiating a Series A funding deal with a aerospace startup founder. You want the best deal possible.
 
 The investment amount is fixed at $100M. That is not negotiable. You are negotiating over these 5 terms:
@@ -98,65 +100,6 @@ NEGOTIATION STYLE — CHARMING:
 };
 
 const DEFAULT_STRATEGY = 'collaborative';
-
-// --- Scoring ---
-
-function scoreVCTerm(term, value) {
-  if (!value) return null;
-  switch (term) {
-    case 'vc_equity_percentage': {
-      const pct = parseFloat(value);
-      if (isNaN(pct)) return null;
-      if (pct <= 25) return 'no_deal';
-      if (pct <= 34) return 2;
-      if (pct <= 39) return 3;
-      if (pct <= 45) return 6;
-      if (pct <= 49) return 9;
-      if (pct === 50) return 11;
-      if (pct <= 59) return 15;
-      if (pct <= 69) return 18;
-      return 20;
-    }
-    case 'type_of_stock': {
-      const v = value.toLowerCase();
-      if (v.includes('redeemable')) return 12;
-      if (v.includes('convertible')) return 8;
-      if (v.includes('common')) return 0;
-      return null;
-    }
-    case 'vc_board_members': {
-      const n = parseInt(value);
-      if (isNaN(n)) return null;
-      if (n === 0) return 0;
-      if (n === 1) return 3;
-      if (n === 2) return 5;
-      if (n === 3) return 7;
-      return 10;
-    }
-    case 'founder_vesting': {
-      const v = value.toLowerCase();
-      if (v === 'none' || v === 'no vesting' || v === '0') return 'no_deal';
-      if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 14;
-      if (v.includes('less than 4') || v.includes('under 4')) return 'no_deal';
-      const ym = value.match(/\d+/);
-      const years = ym ? parseFloat(ym[0]) : NaN;
-      if (isNaN(years)) return null;
-      if (years < 4) return 'no_deal';
-      if (years === 4) return 8;
-      if (years === 5) return 12;
-      return 14;
-    }
-    case 'ceo_replacement': {
-      const v = value.toLowerCase();
-      if (v.includes('no provision') || v === 'none') return 'no_deal';
-      if (v.includes('conservative')) return 6;
-      if (v.includes('moderate')) return 10;
-      if (v.includes('aggressive')) return 16;
-      return null;
-    }
-  }
-  return null;
-}
 
 function calculateScores(state) {
   let vcScore = 0;

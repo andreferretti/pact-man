@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.469.0/font/lucide.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="shared/game-logic.js"></script>
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <title>Pact-Man</title>
 
@@ -1197,94 +1198,14 @@
     }
   }
 
-  // Map a free-text position value to a data-match key for a given term
-  function positionToMatch(term, value) {
-    if (!value) return null;
-    switch (term) {
-      case 'vc_equity_percentage': {
-        const p = parseFloat(value);
-        if (isNaN(p)) return null;
-        if (p <= 30) return '30_or_less';
-        if (p <= 35) return '31_35'; if (p <= 41) return '36_41'; if (p <= 46) return '42_46';
-        if (p <= 49) return '47_49'; if (p <= 55) return '50_55'; if (p <= 59) return '56_59';
-        return '60_plus';
-      }
-      case 'type_of_stock': {
-        const v = value.toLowerCase();
-        if (v.includes('redeemable')) return 'redeemable';
-        if (v.includes('convertible')) return 'convertible';
-        if (v.includes('common')) return 'common';
-        return null;
-      }
-      case 'vc_board_members': {
-        const n = parseInt(value);
-        if (isNaN(n)) return null;
-        if (n === 0) return '0'; if (n === 1) return '1'; if (n === 2) return '2';
-        return 'more_than_2';
-      }
-      case 'founder_vesting': {
-        const v = value.toLowerCase();
-        if (v === 'none' || v === 'no vesting' || v === '0') return 'none';
-        if (v.includes('6 or more') || v.includes('more than 5') || v.includes('over 5')) return '6_plus';
-        if (v.includes('less than 4') || v.includes('under 4') || v.includes('3 or less')) return '3_or_less';
-        const ym = value.match(/\d+/);
-        const y = ym ? parseFloat(ym[0]) : NaN;
-        if (isNaN(y)) return null;
-        if (y >= 6) return '6_plus'; if (y >= 4) return '4_5'; if (y <= 3) return '3_or_less';
-        return null;
-      }
-      case 'ceo_replacement': {
-        const v = value.toLowerCase();
-        if (v.includes('no provision') || v === 'none') return 'none';
-        if (v.includes('conservative')) return 'conservative';
-        if (v.includes('moderate')) return 'moderate';
-        if (v.includes('aggressive')) return 'aggressive';
-        return null;
-      }
-    }
-    return null;
+  const { positionToMatch, scoreFounderTerm, scoreVCTerm } = window.PACT_MAN_LOGIC;
+
+  function toDisplayPoints(points) {
+    return points === 'no_deal' ? 'No Deal' : points;
   }
 
   function getVCPoints(term, value) {
-    if (!value) return null;
-    switch (term) {
-      case 'vc_equity_percentage': {
-        const p = parseFloat(value);
-        if (isNaN(p)) return null;
-        if (p <= 25) return 'No Deal';
-        if (p <= 34) return 2; if (p <= 39) return 3; if (p <= 45) return 6;
-        if (p <= 49) return 9; if (p === 50) return 11; if (p <= 59) return 15;
-        if (p <= 69) return 18; return 20;
-      }
-      case 'type_of_stock': {
-        const v = value.toLowerCase();
-        if (v.includes('common')) return 0; if (v.includes('convertible')) return 8;
-        if (v.includes('redeemable')) return 12; return null;
-      }
-      case 'vc_board_members': {
-        const n = parseInt(value);
-        if (isNaN(n)) return null;
-        if (n === 0) return 0; if (n === 1) return 3; if (n === 2) return 5;
-        if (n === 3) return 7; return 10;
-      }
-      case 'founder_vesting': {
-        const v = value.toLowerCase();
-        if (v === 'none' || v === 'no vesting' || v === '0') return 'No Deal';
-        if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 14;
-        if (v.includes('less than 4') || v.includes('under 4')) return 'No Deal';
-        const ym = value.match(/\d+/);
-        const y = ym ? parseFloat(ym[0]) : NaN;
-        if (isNaN(y)) return null;
-        if (y < 4) return 'No Deal'; if (y === 4) return 8; if (y === 5) return 12; return 14;
-      }
-      case 'ceo_replacement': {
-        const v = value.toLowerCase();
-        if (v.includes('no provision') || v === 'none') return 'No Deal';
-        if (v.includes('conservative')) return 6; if (v.includes('moderate')) return 10;
-        if (v.includes('aggressive')) return 16; return null;
-      }
-    }
-    return null;
+    return toDisplayPoints(scoreVCTerm(term, value));
   }
 
   function updateTracker(state) {
@@ -1375,43 +1296,7 @@
   }
 
   function getFounderPoints(term, value) {
-    if (!value) return null;
-    switch (term) {
-      case 'vc_equity_percentage': {
-        const p = parseFloat(value);
-        if (isNaN(p)) return null;
-        if (p >= 60) return 'No Deal'; if (p >= 56) return 4; if (p >= 50) return 8;
-        if (p >= 47) return 16; if (p >= 42) return 18; if (p >= 36) return 20;
-        if (p >= 31) return 22; return 24;
-      }
-      case 'type_of_stock': {
-        const v = value.toLowerCase();
-        if (v.includes('common')) return 6; if (v.includes('convertible')) return 5;
-        if (v.includes('redeemable')) return 2; return null;
-      }
-      case 'vc_board_members': {
-        const n = parseInt(value);
-        if (isNaN(n)) return null;
-        if (n > 2) return 'No Deal'; if (n === 2) return 6; if (n === 1) return 8; return 2;
-      }
-      case 'founder_vesting': {
-        const v = value.toLowerCase();
-        if (v === 'none' || v === 'no vesting' || v === '0') return 12;
-        if (v.includes('more than 5') || v.includes('over 5') || v.includes('6 or more')) return 3;
-        if (v.includes('less than 4') || v.includes('under 4')) return 10;
-        const ym = value.match(/\d+/);
-        const y = ym ? parseFloat(ym[0]) : NaN;
-        if (isNaN(y)) return null;
-        if (y >= 6) return 3; if (y >= 4) return 8; return 10;
-      }
-      case 'ceo_replacement': {
-        const v = value.toLowerCase();
-        if (v.includes('aggressive')) return 'No Deal'; if (v.includes('moderate')) return 7;
-        if (v.includes('conservative')) return 14;
-        if (v.includes('no provision') || v === 'none') return 19; return null;
-      }
-    }
-    return null;
+    return toDisplayPoints(scoreFounderTerm(term, value));
   }
 
   function showResults(skipFade) {
