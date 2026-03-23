@@ -14,7 +14,7 @@ The investment amount is fixed at **$100M** — what you're negotiating is every
 
 ## Run Locally
 
-⚠️ Before running, you must create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key:
+⚠️ Before running, you must create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key (or rename `.env.example` to `.env`):
 ```
 OPENROUTER_API_KEY=your-key-here
 ```
@@ -115,4 +115,8 @@ After every message exchange, a separate **AI judge** (Claude Sonnet 4.6 via Ope
 - **Backend:** Vercel serverless function (Node.js) — the VC agent and judge live in `api/`
 - **LLM:** Grok 4.20 (VC agent) + Claude Sonnet 4.6 (judge) via OpenRouter
 - **Deploy:** Vercel
+
+## Credits
+
+The negotiation scenario is inspired by the [Aerospace Investment](https://www.pon.harvard.edu/shop/aerospace-investment/) exercise from the Harvard Program on Negotiation.
 
