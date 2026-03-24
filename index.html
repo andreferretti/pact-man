@@ -57,7 +57,7 @@
       background: linear-gradient(90deg, transparent 0%, rgba(208,144,71,0.3) 50%, transparent 100%);
     }
     header > div { display: flex; align-items: center; gap: 14px; }
-    header h1 { font-size: 28px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.06em; }
+    header h1 { font-size: 28px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
     header .logo { height: 34px; filter: drop-shadow(0 0 8px rgba(208,144,71,0.3)); }
 
     .view-scores-btn {
@@ -151,6 +151,64 @@
       font-size: 12px;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+    }
+    .term-info-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1px solid rgba(208, 144, 71, 0.5);
+      background: transparent;
+      color: #D09047;
+      font-size: 9px;
+      font-weight: 700;
+      cursor: help;
+      margin-left: 5px;
+      vertical-align: 1px;
+      position: relative;
+      text-transform: none;
+      letter-spacing: 0;
+      line-height: 1;
+      padding: 0;
+    }
+    .term-info-btn:hover {
+      background: rgba(208, 144, 71, 0.15);
+    }
+    .term-info-tooltip {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 260px;
+      background: #1a1a2e;
+      border: 1px solid rgba(208, 144, 71, 0.3);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: rgba(255,255,255,0.85);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.5;
+      text-transform: none;
+      letter-spacing: 0;
+      text-align: left;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .term-info-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-bottom-color: rgba(208, 144, 71, 0.3);
+    }
+    .term-info-btn:hover .term-info-tooltip {
+      display: block;
     }
     .sidebar .no-deal {
       color: #e05555;
@@ -756,13 +814,13 @@
 
     /* Intro score table */
     .intro-table {
-      width: 100%;
+      width: auto;
+      margin: 0 auto 8px;
       border-collapse: collapse;
       font-size: 13px;
-      margin-bottom: 8px;
     }
     .intro-table th {
-      text-align: left;
+      text-align: center;
       font-weight: 700;
       color: #7D97A5;
       padding: 7px 10px;
@@ -771,14 +829,15 @@
       letter-spacing: 0.06em;
       border-bottom: 1px solid rgba(125,151,165,0.2);
     }
-    .intro-table th:last-child { text-align: right; }
+    .intro-table th:last-child { text-align: center; }
     .intro-table td {
       padding: 5px 10px;
+      text-align: center;
       border-bottom: 1px solid rgba(255,255,255,0.04);
       color: rgba(255,255,255,0.65);
       font-weight: 500;
     }
-    .intro-table td:last-child { text-align: right; font-weight: 700; color: rgba(255,255,255,0.85); }
+    .intro-table td:last-child { text-align: center; font-weight: 700; color: rgba(255,255,255,0.85); }
     .intro-table .term-header-row td {
       padding-top: 18px;
       font-weight: 700;
@@ -788,7 +847,7 @@
       font-size: 12px;
       letter-spacing: 0.03em;
     }
-    .intro-table .no-deal-cell {
+    .intro-table td.no-deal-cell {
       color: #e05555;
       font-weight: 700;
     }
@@ -829,13 +888,14 @@
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .intro-details .intro-table {
-      margin: 0;
+      margin: 0 auto;
       padding: 4px 12px 8px;
     }
     .intro-note {
       font-size: 13px;
       color: rgba(255,255,255,0.4);
       margin: 16px 18px 16px;
+      text-align: center;
     }
 
     .strategy-picker {
@@ -1136,12 +1196,10 @@
   <div class="intro" id="intro">
     <img src="/images/logo.png" alt="Pact-Man" class="intro-banner">
     <div class="intro-content">
-      <h2>What is Pact-Man?</h2>
-      <p>Pact-Man is an AI-powered negotiation game. You play as a <strong>Startup Founder</strong> seeking <strong>Series A funding</strong> from an AI venture capitalist who negotiates back.</p>
-      <p>The investment amount is fixed at <span class="highlight" style="color: #fff">$100M</span> &mdash; what you're negotiating is everything else. Both sides are trying to maximize their score across <strong>5 deal terms</strong>, but your score sheets are different. You'll need to figure out where to push and where to concede.</p>
-      <p>Both parties have a <strong>BATNA (walk-away threshold) of 30 points</strong> &mdash; if your final score is below that, you're better off with no deal.</p>
-
-      <p>Your score sheet below shows how many points each option is worth to you. No need to memorize it &mdash; you'll have access to it in the sidebar during the negotiation.</p>
+      <h2>Welcome to Pact-Man</h2>
+      <p>In this game, you will play as an aerospace startup founder seeking a $100 million Series A funding from an AI venture capitalist. Both you and the AI will try to maximize your score across 5 deal terms (e.g., equity %, board seats, etc.). Since your score sheets are different, you'll need to figure out where to push and where to concede.</p>
+      <p>Both parties have a BATNA (walk-away threshold) of 30 points &mdash; if your final score is below that, you're better off with no deal. Also, some options are "No Deal" for you and some are "No Deal"for the VC, and you can't accept those options.</p>
+      <p>Don't worry, everything will be more clear during the game, as you will have access to your score sheet with all the options and points for each term. If you want to take a peek at your score sheet, just click on the expandable box below.</p>
       <details class="intro-details">
         <summary>View score sheet</summary>
         <table class="intro-table">
@@ -1257,7 +1315,7 @@
         <span><span class="pos-dot vc active" style="opacity:1"></span> VC position</span>
       </div>
       <table id="scoreSheet">
-        <tr class="term-header"><td></td><td>VC Equity %</td><td></td></tr>
+        <tr class="term-header"><td></td><td>VC Equity % <span class="term-info-btn">?<span class="term-info-tooltip">The percentage of your company the VC firm will own in exchange for their $100 million investment. A lower percentage means a higher company valuation and more ownership retained by you and existing shareholders.</span></span></td><td></td></tr>
         <tr data-term="vc_equity_percentage" data-match="30_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>30% or less</td><td>24</td></tr>
         <tr data-term="vc_equity_percentage" data-match="31_35"><td class="dot-cell"><span class="pos-dot"></span></td><td>31 - 35%</td><td>22</td></tr>
         <tr data-term="vc_equity_percentage" data-match="36_41"><td class="dot-cell"><span class="pos-dot"></span></td><td>36 - 41%</td><td>20</td></tr>
@@ -1266,21 +1324,21 @@
         <tr data-term="vc_equity_percentage" data-match="50_55"><td class="dot-cell"><span class="pos-dot"></span></td><td>50 - 55%</td><td>8</td></tr>
         <tr data-term="vc_equity_percentage" data-match="56_59"><td class="dot-cell"><span class="pos-dot"></span></td><td>56 - 59%</td><td>4</td></tr>
         <tr data-term="vc_equity_percentage" data-match="60_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>60% or more</td><td class="no-deal">No Deal</td></tr>
-        <tr class="term-header"><td></td><td>Type of Stock</td></tr>
+        <tr class="term-header"><td></td><td>Type of Stock <span class="term-info-btn">?<span class="term-info-tooltip">The class of shares the VC receives.<br><br><b>Common</b> — No special privileges. Same rights as all other shareholders.<br><br><b>Convertible Preferred</b> — VC gets their investment back first in a sale, but converts to common if the company does well.<br><br><b>Redeemable Preferred</b> — VC gets their money back <i>and</i> keeps their equity share if the company is sold or goes public — a "double dip."</span></span></td></tr>
         <tr data-term="type_of_stock" data-match="common"><td class="dot-cell"><span class="pos-dot"></span></td><td>Common</td><td>6</td></tr>
         <tr data-term="type_of_stock" data-match="convertible"><td class="dot-cell"><span class="pos-dot"></span></td><td>Convertible Preferred</td><td>5</td></tr>
         <tr data-term="type_of_stock" data-match="redeemable"><td class="dot-cell"><span class="pos-dot"></span></td><td>Redeemable Preferred</td><td>2</td></tr>
-        <tr class="term-header"><td></td><td>VC Board Members</td></tr>
+        <tr class="term-header"><td></td><td>VC Board Members <span class="term-info-btn">?<span class="term-info-tooltip">The number of seats the VC can appoint to your board of directors, which currently has 3 members (you + 2 independents). More VC seats means more investor influence over strategic decisions, management oversight, and major transactions.</span></span></td></tr>
         <tr data-term="vc_board_members" data-match="0"><td class="dot-cell"><span class="pos-dot"></span></td><td>0 members</td><td>2</td></tr>
         <tr data-term="vc_board_members" data-match="1"><td class="dot-cell"><span class="pos-dot"></span></td><td>1 member</td><td>8</td></tr>
         <tr data-term="vc_board_members" data-match="2"><td class="dot-cell"><span class="pos-dot"></span></td><td>2 members</td><td>6</td></tr>
         <tr data-term="vc_board_members" data-match="more_than_2"><td class="dot-cell"><span class="pos-dot"></span></td><td>More than 2</td><td class="no-deal">No Deal</td></tr>
-        <tr class="term-header"><td></td><td>Founder Vesting</td></tr>
+        <tr class="term-header"><td></td><td>Founder Vesting <span class="term-info-btn">?<span class="term-info-tooltip">How many years until you fully re-earn your equity stake. With vesting, you temporarily surrender your shares and earn them back gradually each year you stay. A longer schedule ties you to the company longer but limits your flexibility.</span></span></td></tr>
         <tr data-term="founder_vesting" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No vesting</td><td>12</td></tr>
         <tr data-term="founder_vesting" data-match="3_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>3 years or less</td><td>10</td></tr>
         <tr data-term="founder_vesting" data-match="4_5"><td class="dot-cell"><span class="pos-dot"></span></td><td>4 or 5 years</td><td>8</td></tr>
         <tr data-term="founder_vesting" data-match="6_plus"><td class="dot-cell"><span class="pos-dot"></span></td><td>6 or more years</td><td>3</td></tr>
-        <tr class="term-header"><td></td><td>CEO Replacement</td><td></td></tr>
+        <tr class="term-header"><td></td><td>CEO Replacement <span class="term-info-btn">?<span class="term-info-tooltip">The performance benchmark that triggers the VC's right to replace you as CEO. Benchmarks are based on your own revenue projections — conservative (most achievable), moderate, or aggressive (near-impossible to hit consistently). No provision means you can't be removed based on revenue targets.</span></span></td><td></td></tr>
         <tr data-term="ceo_replacement" data-match="none"><td class="dot-cell"><span class="pos-dot"></span></td><td>No provision</td><td>19</td></tr>
         <tr data-term="ceo_replacement" data-match="conservative"><td class="dot-cell"><span class="pos-dot"></span></td><td>Conservative Projections</td><td>14</td></tr>
         <tr data-term="ceo_replacement" data-match="moderate"><td class="dot-cell"><span class="pos-dot"></span></td><td>Moderate Projections</td><td>7</td></tr>

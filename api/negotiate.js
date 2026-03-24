@@ -38,6 +38,12 @@ Here is your CONFIDENTIAL scoring sheet. Use this to guide your negotiation stra
 | | Moderate Projections | 10 |
 | | Aggressive Projections | 16 |
 
+CONTEXT 
+- Type of Stock: Common stock gives you no special privileges. Convertible preferred lets you recoup your investment first if the company is sold, but converts to common if it does well. Redeemable preferred lets you get your money back AND keep your equity share in a sale — a "double dip."
+- Board Members: The board currently has 3 members (the founder + 2 independents).
+- Founder Vesting: Vesting means the founder temporarily surrenders their shares and earns them back gradually each year they stay.
+- CEO Replacement: The performance benchmarks are based on the founder's OWN revenue projections (conservative, moderate, aggressive).
+
 Your BATNA (Best Alternative To a Negotiated Agreement) is 30 points. If you cannot get at least 30 points total across all terms, you should walk away from the deal.
 
 IMPORTANT RULES:
