@@ -15,6 +15,7 @@ if (fs.existsSync(envPath)) {
 const handler = require('./api/negotiate');
 const judgeHandler = require('./api/judge');
 const coachHandler = require('./api/coach');
+const simulateFounderHandler = require('./api/simulate-founder');
 let testNegotiateHandler;
 try { testNegotiateHandler = require('./api/test-negotiate'); } catch {}
 
@@ -38,8 +39,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && (parsedUrl.pathname === '/api/negotiate' || parsedUrl.pathname === '/api/judge' || parsedUrl.pathname === '/api/coach' || parsedUrl.pathname === '/api/test-negotiate')) {
-    const h = parsedUrl.pathname === '/api/judge' ? judgeHandler : parsedUrl.pathname === '/api/coach' ? coachHandler : parsedUrl.pathname === '/api/test-negotiate' ? testNegotiateHandler : handler;
+  const postRoutes = ['/api/negotiate', '/api/judge', '/api/coach', '/api/simulate-founder', '/api/test-negotiate'];
+  if (req.method === 'POST' && postRoutes.includes(parsedUrl.pathname)) {
+    const routeMap = { '/api/judge': judgeHandler, '/api/coach': coachHandler, '/api/simulate-founder': simulateFounderHandler, '/api/test-negotiate': testNegotiateHandler };
+    const h = routeMap[parsedUrl.pathname] || handler;
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {

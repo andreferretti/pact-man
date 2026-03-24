@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pact-Man — Simulation Benchmark</title>
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.469.0/font/lucide.min.css" />
+  <script src="/shared/game-logic.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: #092430;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* -- Header -- */
+    header {
+      background: linear-gradient(180deg, #0a2836 0%, #092430 100%);
+      color: white;
+      padding: 18px 28px;
+      border-bottom: 1px solid rgba(208,144,71,0.15);
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(208,144,71,0.3) 50%, transparent 100%);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-left .logo { height: 34px; filter: drop-shadow(0 0 8px rgba(208,144,71,0.3)); }
+    .header-left h1 { font-size: 28px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+    .header-left .subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #D09047;
+      margin-left: 8px;
+      padding: 4px 10px;
+      border: 1px solid rgba(208,144,71,0.3);
+      border-radius: 4px;
+    }
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .back-link {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: rgba(255,255,255,0.8); }
+
+    #runBtn {
+      background: linear-gradient(135deg, #D09047 0%, #c07e35 100%);
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.03em;
+      box-shadow: 0 2px 8px rgba(208,144,71,0.25);
+    }
+    #runBtn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #c07e35 0%, #a86a28 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(208,144,71,0.35);
+    }
+    #runBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* -- Status bar -- */
+    .status-bar {
+      background: #0a2836;
+      border-bottom: 1px solid rgba(208,144,71,0.1);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+    .status-text { font-weight: 500; }
+    .status-timer {
+      margin-left: auto;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+    }
+    .status-dot.active {
+      background: #4ecdc4;
+      box-shadow: 0 0 8px rgba(78,205,196,0.5);
+      animation: pulse 1.5s ease infinite;
+    }
+    .status-dot.done { background: #D09047; box-shadow: none; animation: none; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* -- Columns -- */
+    .columns {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid rgba(9,36,48,0.08);
+    }
+    .column:last-child { border-right: none; }
+
+    .col-header {
+      background: linear-gradient(180deg, #f0f2f4 0%, #e8eaed 100%);
+      padding: 12px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #D09047;
+      border-bottom: 1px solid rgba(9,36,48,0.08);
+      text-align: center;
+    }
+
+    .chat {
+      padding: 16px 14px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #ffffff;
+    }
+
+    .chat .empty-state {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #b0bec5;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* -- Messages -- */
+    @keyframes msgSlideIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message {
+      display: flex;
+      flex-direction: column;
+      max-width: 88%;
+      animation: msgSlideIn 0.25s ease both;
+    }
+    .message.vc  { align-self: flex-start; }
+    .message.founder { align-self: flex-end; align-items: flex-end; }
+
+    .msg-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #8a9aa5;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .msg-label .avatar {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px;
+      flex-shrink: 0;
+      color: white;
+      background: linear-gradient(135deg, #0d3040 0%, #092430 100%);
+      box-shadow: 0 1px 4px rgba(9,36,48,0.25);
+    }
+    .message.founder .msg-label .avatar {
+      background: linear-gradient(135deg, #D09047 0%, #a86a28 100%);
+    }
+
+    .bubble {
+      padding: 10px 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #2a3a44;
+    }
+    .message.vc .bubble {
+      background: #fff;
+      border: 1px solid rgba(9,36,48,0.07);
+      border-radius: 3px 14px 14px 14px;
+      box-shadow: 0 1px 3px rgba(9,36,48,0.04);
+    }
+    .message.founder .bubble {
+      background: linear-gradient(135deg, #0d3040 0%, #092430 100%);
+      color: #fff;
+      border-radius: 14px 3px 14px 14px;
+      box-shadow: 0 1px 6px rgba(9,36,48,0.2);
+    }
+
+    .bubble table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0;
+      font-size: 11px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .bubble th, .bubble td {
+      padding: 5px 8px;
+      border: 1px solid #e2e4e7;
+      text-align: left;
+    }
+    .bubble th {
+      background: #f0f1f3;
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #5a6a75;
+    }
+    .bubble tr:nth-child(even) td { background: #f8f9fa; }
+    .message.founder .bubble table { border-color: rgba(255,255,255,0.15); }
+    .message.founder .bubble th { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+    .message.founder .bubble td { border-color: rgba(255,255,255,0.1); }
+    .message.founder .bubble tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
+
+    /* Typing indicator */
+    .typing-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #D09047;
+      margin: 0 2px;
+      animation: blink 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 60%, 100% { opacity: 0.3; }
+      30% { opacity: 1; }
+    }
+
+    /* -- Score card -- */
+    .score-card {
+      background: linear-gradient(180deg, #f0f2f4 0%, #e8eaed 100%);
+      border-top: 2px solid #D09047;
+      padding: 14px;
+      animation: slideUp 0.4s ease both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .score-card h4 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .score-card h4.deal-reached { color: #2e7d32; }
+    .score-card h4.no-deal { color: #e05555; }
+    .score-card h4.max-rounds { color: #e68a00; }
+
+    .score-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .score-card th {
+      text-align: left;
+      font-weight: 700;
+      color: #7D97A5;
+      padding: 4px 6px;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(125,151,165,0.25);
+    }
+    .score-card td {
+      padding: 4px 6px;
+      border-bottom: 1px solid rgba(125,151,165,0.08);
+      font-weight: 500;
+    }
+    .score-card th:not(:first-child),
+    .score-card td:not(:first-child) { text-align: center; }
+    .score-card .total-row td {
+      font-weight: 700;
+      border-top: 2px solid rgba(125,151,165,0.3);
+      padding-top: 6px;
+    }
+    .score-card .total-row td:nth-child(2) { color: #D09047; }
+    .score-card .total-row td:nth-child(3) { color: #0d3040; }
+    .score-card .no-deal-val { color: #e05555; font-weight: 700; }
+    .batna-pass { color: #2e7d32; }
+    .batna-fail { color: #e05555; }
+
+    /* Round indicator */
+    .round-indicator {
+      text-align: center;
+      padding: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #8a9aa5;
+      letter-spacing: 0.04em;
+      background: rgba(0,0,0,0.02);
+      border-bottom: 1px solid rgba(9,36,48,0.05);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <img class="logo" src="/images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <h1>Pact-Man</h1>
+      <span class="subtitle">Simulation</span>
+    </div>
+    <div class="header-right">
+      <a href="/" class="back-link">&larr; Back to game</a>
+      <button id="runBtn" onclick="startSimulation()">Run Simulation</button>
+    </div>
+  </header>
+
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span class="status-text" id="statusText">Ready — click "Run Simulation" to start</span>
+    <span class="status-timer" id="statusTimer"></span>
+  </div>
+
+  <div class="columns">
+    <div class="column" id="col-aggressive">
+      <div class="col-header">Aggressive</div>
+      <div class="round-indicator" id="round-aggressive">&mdash;</div>
+      <div class="chat" id="chat-aggressive">
+        <div class="empty-state">Waiting to start...</div>
+      </div>
+    </div>
+    <div class="column" id="col-collaborative">
+      <div class="col-header">Collaborative</div>
+      <div class="round-indicator" id="round-collaborative">&mdash;</div>
+      <div class="chat" id="chat-collaborative">
+        <div class="empty-state">Waiting to start...</div>
+      </div>
+    </div>
+    <div class="column" id="col-charming">
+      <div class="col-header">Charming</div>
+      <div class="round-indicator" id="round-charming">&mdash;</div>
+      <div class="chat" id="chat-charming">
+        <div class="empty-state">Waiting to start...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const MAX_ROUNDS = 10;
+  const { scoreFounderTerm, scoreVCTerm } = PACT_MAN_LOGIC;
+
+  let timerInterval = null;
+  let startTime = null;
+
+  function defaultState() {
+    return {
+      terms: {
+        vc_equity_percentage: { vc_position: null, founder_position: null, status: 'open', agreed_value: null },
+        type_of_stock: { vc_position: null, founder_position: null, status: 'open', agreed_value: null },
+        vc_board_members: { vc_position: null, founder_position: null, status: 'open', agreed_value: null },
+        founder_vesting: { vc_position: null, founder_position: null, status: 'open', agreed_value: null },
+        ceo_replacement: { vc_position: null, founder_position: null, status: 'open', agreed_value: null },
+      },
+      overall_status: 'negotiating',
+    };
+  }
+
+  // -- Rendering helpers --
+
+  function renderBotHtml(text) {
+    const lines = text.split('\n').map(l =>
+      l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    );
+    let html = '', inList = false, inTable = false;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const isTableRow = /^\|(.+\|)+\s*$/.test(line.trim());
+      const isSeparator = /^\|[\s\-:|]+\|$/.test(line.trim());
+      if (isTableRow || isSeparator) {
+        if (inList) { html += '</ul>'; inList = false; }
+        if (isSeparator) continue;
+        if (!inTable) { html += '<table>'; inTable = true; }
+        const cells = line.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+        const isHeader = i + 1 < lines.length && /^\|[\s\-:|]+\|$/.test(lines[i + 1].trim());
+        const tag = isHeader ? 'th' : 'td';
+        html += '<tr>' + cells.map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>';
+      } else {
+        if (inTable) { html += '</table>'; inTable = false; }
+        if (/^\* /.test(line)) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += '<li>' + line.slice(2) + '</li>';
+        } else {
+          if (inList) { html += '</ul>'; inList = false; }
+          if (html) html += '<br>';
+          html += line;
+        }
+      }
+    }
+    if (inList) html += '</ul>';
+    if (inTable) html += '</table>';
+    return html;
+  }
+
+  function addBubble(chatEl, role, text) {
+    chatEl.querySelector('.empty-state')?.remove();
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `message ${role}`;
+
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    if (role === 'vc') {
+      label.innerHTML = '<div class="avatar"><i class="icon-briefcase"></i></div> VC';
+    } else {
+      label.innerHTML = '<div class="avatar"><i class="icon-rocket"></i></div> Founder';
+    }
+    wrapper.appendChild(label);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = renderBotHtml(text);
+
+    wrapper.appendChild(bubble);
+    chatEl.appendChild(wrapper);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function showTyping(chatEl, role) {
+    chatEl.querySelector('.empty-state')?.remove();
+    const wrapper = document.createElement('div');
+    wrapper.className = `message ${role} typing-msg`;
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    if (role === 'vc') {
+      label.innerHTML = '<div class="avatar"><i class="icon-briefcase"></i></div> VC';
+    } else {
+      label.innerHTML = '<div class="avatar"><i class="icon-rocket"></i></div> Founder';
+    }
+    wrapper.appendChild(label);
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+    wrapper.appendChild(bubble);
+    chatEl.appendChild(wrapper);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function hideTyping(chatEl) {
+    chatEl.querySelector('.typing-msg')?.remove();
+  }
+
+  function updateRound(strategy, round) {
+    document.getElementById(`round-${strategy}`).textContent = `Round ${round} / ${MAX_ROUNDS}`;
+  }
+
+  // -- Score card --
+
+  function showScoreCard(column, state, outcome) {
+    const labels = {
+      vc_equity_percentage: 'Equity %',
+      type_of_stock: 'Stock',
+      vc_board_members: 'Board',
+      founder_vesting: 'Vesting',
+      ceo_replacement: 'CEO',
+    };
+
+    let founderTotal = 0, vcTotal = 0;
+    let founderNoDeal = false, vcNoDeal = false;
+    let agreed = 0;
+    const rows = [];
+
+    for (const [key, label] of Object.entries(labels)) {
+      const t = state.terms[key];
+      if (t.status === 'tentatively_agreed' && t.agreed_value) {
+        agreed++;
+        const fs = scoreFounderTerm(key, t.agreed_value);
+        const vs = scoreVCTerm(key, t.agreed_value);
+        if (fs === 'no_deal') founderNoDeal = true;
+        else if (fs !== null) founderTotal += fs;
+        if (vs === 'no_deal') vcNoDeal = true;
+        else if (vs !== null) vcTotal += vs;
+        const fsDisplay = fs === 'no_deal' ? '<span class="no-deal-val">ND</span>' : (fs !== null ? fs : '?');
+        const vsDisplay = vs === 'no_deal' ? '<span class="no-deal-val">ND</span>' : (vs !== null ? vs : '?');
+        const val = t.agreed_value.length > 12 ? t.agreed_value.slice(0, 12) + '...' : t.agreed_value;
+        rows.push(`<tr><td>${label}</td><td>${val}</td><td>${fsDisplay}</td><td>${vsDisplay}</td></tr>`);
+      } else {
+        rows.push(`<tr><td>${label}</td><td style="color:#aaa">—</td><td>—</td><td>—</td></tr>`);
+      }
+    }
+
+    const fResult = founderNoDeal ? 'ND' : founderTotal;
+    const vResult = vcNoDeal ? 'ND' : vcTotal;
+    const fBatna = founderNoDeal ? 'batna-fail' : (founderTotal >= 30 ? 'batna-pass' : 'batna-fail');
+    const vBatna = vcNoDeal ? 'batna-fail' : (vcTotal >= 30 ? 'batna-pass' : 'batna-fail');
+
+    let headerClass, headerText;
+    if (outcome === 'deal') {
+      headerClass = 'deal-reached';
+      headerText = `Deal Reached (${agreed}/5 terms)`;
+    } else if (outcome === 'max-rounds') {
+      headerClass = 'max-rounds';
+      headerText = `Max Rounds (${agreed}/5 agreed)`;
+    } else {
+      headerClass = 'no-deal';
+      headerText = 'No Deal';
+    }
+
+    const card = document.createElement('div');
+    card.className = 'score-card';
+    card.innerHTML = `
+      <h4 class="${headerClass}">${headerText}</h4>
+      <table>
+        <tr><th>Term</th><th>Agreed</th><th>Founder</th><th>VC</th></tr>
+        ${rows.join('')}
+        <tr class="total-row">
+          <td>Total</td>
+          <td></td>
+          <td class="${fBatna}">${fResult}${!founderNoDeal ? '/59' : ''}</td>
+          <td class="${vBatna}">${vResult}${!vcNoDeal ? '/54' : ''}</td>
+        </tr>
+      </table>
+    `;
+    column.appendChild(card);
+  }
+
+  // -- Timer --
+
+  function startTimer() {
+    startTime = Date.now();
+    const el = document.getElementById('statusTimer');
+    timerInterval = setInterval(() => {
+      const s = Math.floor((Date.now() - startTime) / 1000);
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      el.textContent = `${m}:${sec.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+  }
+
+  // -- API calls --
+
+  async function fetchJSON(url, body) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    return res.json();
+  }
+
+  // -- Negotiation loop --
+
+  async function runNegotiation(strategyKey) {
+    const column = document.getElementById(`col-${strategyKey}`);
+    const chatEl = document.getElementById(`chat-${strategyKey}`);
+    chatEl.innerHTML = '';
+
+    // Get VC intro
+    const introRes = await fetch(`/api/negotiate?strategy=${strategyKey}`);
+    const { intro } = await introRes.json();
+    addBubble(chatEl, 'vc', intro);
+
+    let vcMessages = [];
+    let founderMessages = [{ role: 'user', content: intro }];
+    let state = defaultState();
+    let outcome = 'max-rounds';
+
+    for (let round = 1; round <= MAX_ROUNDS; round++) {
+      updateRound(strategyKey, round);
+
+      // Founder responds
+      showTyping(chatEl, 'founder');
+      const founderRes = await fetchJSON('/api/simulate-founder', {
+        messages: founderMessages,
+        state,
+      });
+      hideTyping(chatEl);
+      addBubble(chatEl, 'founder', founderRes.message);
+
+      founderMessages.push({ role: 'assistant', content: founderRes.message });
+      vcMessages.push({ role: 'user', content: founderRes.message });
+
+      // VC responds
+      showTyping(chatEl, 'vc');
+      const vcRes = await fetchJSON('/api/negotiate', {
+        messages: vcMessages,
+        state,
+        strategy: strategyKey,
+      });
+      hideTyping(chatEl);
+      addBubble(chatEl, 'vc', vcRes.message);
+
+      vcMessages.push({ role: 'assistant', content: vcRes.message });
+      founderMessages.push({ role: 'user', content: vcRes.message });
+
+      // Judge evaluates
+      const judgeRes = await fetchJSON('/api/judge', {
+        messages: vcMessages,
+        state,
+      });
+
+      if (judgeRes.state) {
+        delete judgeRes.state._judgeRaw;
+        delete judgeRes.state._judgeError;
+        state = judgeRes.state;
+      }
+
+      if (state.overall_status === 'deal_reached') {
+        outcome = 'deal';
+        break;
+      }
+    }
+
+    showScoreCard(column, state, outcome);
+    document.getElementById(`round-${strategyKey}`).textContent =
+      outcome === 'deal' ? 'Complete' : `Done (${outcome === 'max-rounds' ? 'max rounds' : 'no deal'})`;
+
+    return { strategyKey, state, outcome };
+  }
+
+  // -- Main --
+
+  let running = false;
+
+  async function startSimulation() {
+    if (running) return;
+    running = true;
+
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.textContent = 'Running...';
+
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    dot.className = 'status-dot active';
+    text.textContent = 'Running 3 negotiations in parallel...';
+    startTimer();
+
+    // Remove old score cards
+    document.querySelectorAll('.score-card').forEach(el => el.remove());
+
+    const strategies = ['aggressive', 'collaborative', 'charming'];
+    const completed = [];
+
+    try {
+      const results = await Promise.all(
+        strategies.map(s =>
+          runNegotiation(s)
+            .then(r => {
+              completed.push(r.strategyKey);
+              text.textContent = `${completed.length}/3 complete — ${strategies.filter(x => !completed.includes(x)).join(', ') || 'finishing up'}`;
+              return r;
+            })
+            .catch(err => {
+              console.error(`${s} failed:`, err);
+              const chatEl = document.getElementById(`chat-${s}`);
+              hideTyping(chatEl);
+              addBubble(chatEl, 'vc', `Simulation error: ${err.message}`);
+              return { strategyKey: s, state: defaultState(), outcome: 'error' };
+            })
+        )
+      );
+
+      dot.className = 'status-dot done';
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+      text.textContent = `Complete — 3 negotiations finished in ${elapsed}s`;
+    } catch (err) {
+      dot.className = 'status-dot';
+      text.textContent = `Error: ${err.message}`;
+    }
+
+    stopTimer();
+    btn.disabled = false;
+    btn.textContent = 'Run Again';
+    running = false;
+  }
+  </script>
+</body>
+</html>
