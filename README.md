@@ -8,13 +8,11 @@
 
 ## What is Pact-Man?
 
-Pact-Man is an AI-powered negotiation game. You play as a **Startup Founder** seeking Series A funding, while an **AI VC investor agent** (powered by Grok 4.20 via OpenRouter) negotiates back. Both sides are trying to maximize their score across 5 deal terms — but your score sheets are different, so you'll need to figure out where to push and where to concede.
-
-The investment amount is fixed at **$100M** — what you're negotiating is everything else.
+An AI-powered negotiation game. You're an aerospace startup founder negotiating a $100M Series A investment with an AI VC agent. You both score points on 5 deal terms (equity %, board seats, etc.), but your score sheets are different, so the game is figuring out where to push and where to give.
 
 ## Run Locally
 
-⚠️ Before running, you must create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key (or rename `.env.example` to `.env`):
+⚠️ Before running, create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key (or rename the existing `.env.example` file to `.env` and fill in your key):
 ```
 OPENROUTER_API_KEY=your-key-here
 ```
@@ -24,15 +22,17 @@ Once the API keys are set up, run:
 npm run dev
 ```
 
-The project opens automatically at `http://localhost:3000`.
+That's it! The project opens automatically at `http://localhost:3000`.
 
 ## Scoring
 
-Each term has discrete options worth different points to each side. Both parties have a **BATNA (walk-away threshold) of 30 points** — if your final score is below that, you're better off with no deal.
+Each one of the 5 negotiation terms has options worth different points to each side. Both parties have a BATNA (walk-away threshold) of 30 points — if your final score is below that, you're better off with no deal.
 
-Some options are **No Deal** for one side, meaning the other party will never accept them.
+Some options are "No Deal", meaning that you (or the VC) should never accept them. See the table below:
 
 ### Founder Score Sheet
+
+This table shows the options and points for the Founder.
 
 | Term | Options | Points |
 | :--- | :--- | :--- |
@@ -62,7 +62,7 @@ Some options are **No Deal** for one side, meaning the other party will never ac
 
 ### VC Score Sheet
 
-The AI VC has its own secret scoring — the points are different from yours, which is what makes the negotiation interesting. Revealed here for reference.
+The AI-powered VC agent has its own secret scoring — the points are different from yours, which is what makes the negotiation interesting. Click the expandable box below to view it anyways:
 
 <details>
 <summary><b>View VC score sheet</b></summary>
@@ -102,20 +102,20 @@ The AI VC has its own secret scoring — the points are different from yours, wh
 Before starting, you choose how the AI VC negotiates:
 
 - **Collaborative** — Partnership-oriented. Explores tradeoffs, suggests package deals, makes first concessions to build goodwill. Frames everything as joint problem-solving.
-- **Aggressive** — Tough and demanding. Anchors with aggressive terms, makes small reluctant concessions, uses leverage like deal flow and market risk. Holds firm under pushback.
-- **Charming** — Charismatic dealmaker. Uses humor, portfolio stories, and rapport to influence. Makes concessions feel like personal gestures and deflects tough demands with warmth before countering.
+- **Aggressive** — Tough and demanding. Anchors with aggressive terms, makes small reluctant concessions, uses leverage by mentioning deal flow and market risk. Holds firm under pushback.
+- **Charming** — Charismatic dealmaker. Uses humor, portfolio stories, and rapport to influence you. Makes concessions feel like personal gestures and deflects tough demands with warmth before countering.
 
 ## The AI Judge
 
-After every message exchange, a separate **AI judge** (Claude Sonnet 4.6 via OpenRouter, using tool calls) reads the full conversation and extracts the current state of each term — what each side has proposed, and whether there's a tentative agreement. This keeps the Deal Tracker sidebar in sync with the conversation without relying on the VC agent to self-report accurately.
+A separate AI judge (Claude Sonnet 4.6) watches the full conversation and keeps the Deal Tracker sidebar in sync — after every exchange, it figures out what each side has proposed and whether there's agreement on each term.
 
 ## Stack
 
-- **Frontend:** Plain HTML/CSS/JS — no framework, no build step
+- **Frontend:** Plain HTML/CSS/JS — no frameworks, no build steps
 - **Backend:** Vercel serverless function (Node.js) — the VC agent and judge live in `api/`
-- **LLM:** Grok 4.20 (VC agent) + Claude Sonnet 4.6 (judge) via OpenRouter
+- **LLM:** Grok 4.20 (VC agent) + Claude Sonnet 4.6 (judge) called via the OpenRouter API
 - **Deploy:** Vercel
 
 ## Credits
 
-The negotiation scenario is inspired by the [Aerospace Investment](https://www.pon.harvard.edu/shop/aerospace-investment/) exercise from the Harvard Program on Negotiation.
+This negotiation scenario was inspired by the [Aerospace Investment](https://www.pon.harvard.edu/shop/aerospace-investment/) exercise from the Harvard Program on Negotiation.
