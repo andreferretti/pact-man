@@ -23,11 +23,25 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=block" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body { height: 100%; }
+
+    /* Hide everything except the logo until fonts are ready */
+    body:not(.fonts-ready) header,
+    body:not(.fonts-ready) .intro-content {
+      opacity: 0;
+    }
+    body.fonts-ready header,
+    body.fonts-ready .intro-content {
+      animation: fadeIn 0.3s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
     body {
       font-family: 'Manrope', sans-serif;
@@ -812,92 +826,6 @@
       font-weight: 700;
     }
 
-    /* Intro score table */
-    .intro-table {
-      width: auto;
-      margin: 0 auto 8px;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    .intro-table th {
-      text-align: center;
-      font-weight: 700;
-      color: #7D97A5;
-      padding: 7px 10px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      border-bottom: 1px solid rgba(125,151,165,0.2);
-    }
-    .intro-table th:last-child { text-align: center; }
-    .intro-table td {
-      padding: 5px 10px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      color: rgba(255,255,255,0.65);
-      font-weight: 500;
-    }
-    .intro-table td:last-child { text-align: center; font-weight: 700; color: rgba(255,255,255,0.85); }
-    .intro-table .term-header-row td {
-      padding-top: 18px;
-      font-weight: 700;
-      color: #D09047;
-      text-align: left;
-      border-bottom: 1px solid rgba(208,144,71,0.15);
-      font-size: 12px;
-      letter-spacing: 0.03em;
-    }
-    .intro-table td.no-deal-cell {
-      color: #e05555;
-      font-weight: 700;
-    }
-
-    .intro-details {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 14px;
-      margin-top: 14px;
-      margin-bottom: 32px;
-      backdrop-filter: blur(8px);
-    }
-    .intro-details summary {
-      padding: 16px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.7);
-      cursor: pointer;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: color 0.2s;
-      letter-spacing: 0.02em;
-    }
-    .intro-details summary:hover { color: rgba(255,255,255,0.9); }
-    .intro-details summary::-webkit-details-marker { display: none; }
-    .intro-details summary::before {
-      content: '\25B6';
-      font-size: 9px;
-      color: #D09047;
-      transition: transform 0.25s ease;
-    }
-    .intro-details[open] summary::before {
-      transform: rotate(90deg);
-    }
-    .intro-details[open] summary {
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .intro-details .intro-table {
-      margin: 0 auto;
-      padding: 4px 12px 8px;
-    }
-    .intro-note {
-      font-size: 13px;
-      color: rgba(255,255,255,0.4);
-      margin: 16px 18px 16px;
-      text-align: center;
-    }
-
     .strategy-picker {
       margin-top: 32px;
       margin-bottom: 32px;
@@ -1193,48 +1121,22 @@
   </style>
 </head>
 <body>
+<script>
+  document.fonts.ready.then(function() {
+    document.body.classList.add('fonts-ready');
+  });
+  // Fallback: reveal after 3s even if fonts fail to load
+  setTimeout(function() {
+    document.body.classList.add('fonts-ready');
+  }, 3000);
+</script>
   <div class="intro" id="intro">
     <img src="/images/logo.png" alt="Pact-Man" class="intro-banner">
     <div class="intro-content">
       <h2>Welcome to Pact-Man</h2>
       <p>In this game, you will play as an aerospace startup founder seeking a $100 million Series A funding from an AI venture capitalist. Both you and the AI will try to maximize your score across 5 deal terms (e.g., equity %, board seats, etc.). Since your score sheets are different, you'll need to figure out where to push and where to concede.</p>
-      <p>Both parties have a BATNA (walk-away threshold) of 30 points &mdash; if your final score is below that, you're better off with no deal. Also, some options are "No Deal" for you and some are "No Deal"for the VC, and you can't accept those options.</p>
-      <p>Don't worry, everything will be more clear during the game, as you will have access to your score sheet with all the options and points for each term. If you want to take a peek at your score sheet, just click on the expandable box below.</p>
-      <details class="intro-details">
-        <summary>View score sheet</summary>
-        <table class="intro-table">
-          <tr><th>Option</th><th>Points</th></tr>
-          <tr class="term-header-row"><td colspan="2">#1: VC Equity Percentage</td></tr>
-          <tr><td>30% or less</td><td>24</td></tr>
-          <tr><td>31 - 35%</td><td>22</td></tr>
-          <tr><td>36 - 41%</td><td>20</td></tr>
-          <tr><td>42 - 46%</td><td>18</td></tr>
-          <tr><td>47 - 49%</td><td>16</td></tr>
-          <tr><td>50 - 55%</td><td>8</td></tr>
-          <tr><td>56 - 59%</td><td>4</td></tr>
-          <tr><td>60% or more</td><td class="no-deal-cell">No Deal</td></tr>
-          <tr class="term-header-row"><td colspan="2">#2: Type of Stock</td></tr>
-          <tr><td>Common</td><td>6</td></tr>
-          <tr><td>Convertible Preferred</td><td>5</td></tr>
-          <tr><td>Redeemable Preferred</td><td>2</td></tr>
-          <tr class="term-header-row"><td colspan="2">#3: VC Appointed Board Members</td></tr>
-          <tr><td>0 members</td><td>2</td></tr>
-          <tr><td>1 member</td><td>8</td></tr>
-          <tr><td>2 members</td><td>6</td></tr>
-          <tr><td>More than 2</td><td class="no-deal-cell">No Deal</td></tr>
-          <tr class="term-header-row"><td colspan="2">#4: Vesting of Founder's Shares</td></tr>
-          <tr><td>No vesting</td><td>12</td></tr>
-          <tr><td>3 years or less</td><td>10</td></tr>
-          <tr><td>4 or 5 years</td><td>8</td></tr>
-          <tr><td>6 or more years</td><td>3</td></tr>
-          <tr class="term-header-row"><td colspan="2">#5: CEO Replacement Provision</td></tr>
-          <tr><td>No provision</td><td>19</td></tr>
-          <tr><td>Conservative Projections</td><td>14</td></tr>
-          <tr><td>Moderate Projections</td><td>7</td></tr>
-          <tr><td>Aggressive Projections</td><td class="no-deal-cell">No Deal</td></tr>
-        </table>
-        <div class="intro-note">Some options are "No Deal" for the VC too &mdash; you'll need to discover those during negotiation.</div>
-      </details>
+      <p>Both parties have a BATNA (walk-away threshold) of 30 points &mdash; if your final score is below that, you're better off with no deal. Also, some options are "No Deal" for you and some are "No Deal" for the VC, and you can't accept those options.</p>
+      <p>Don't worry, everything will be more clear during the game, as you will have access to your score sheet with all the options and points for each term.</p>
 
       <div class="strategy-picker">
         <h3>Choose the VC's negotiation style</h3>
