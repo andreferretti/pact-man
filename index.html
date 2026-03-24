@@ -157,6 +157,13 @@
     }
     .sidebar td, .sidebar th { text-align: center; }
     .sidebar td:first-child, .sidebar th:first-child { text-align: center; }
+    .sidebar .points-col-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: #7D97A5;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
     .sidebar .term-header td {
       padding-top: 20px;
       font-weight: 700;
@@ -1217,7 +1224,7 @@
         <span><span class="pos-dot vc active" style="opacity:1"></span> VC position</span>
       </div>
       <table id="scoreSheet">
-        <tr class="term-header"><td></td><td>VC Equity % <span class="term-info-btn">?<span class="term-info-tooltip">The percentage of your company the VC firm will own in exchange for their $100 million investment. A lower percentage means a higher company valuation and more ownership retained by you and existing shareholders.</span></span></td><td></td></tr>
+        <tr class="term-header"><td></td><td>VC Equity % <span class="term-info-btn">?<span class="term-info-tooltip">The percentage of your company the VC firm will own in exchange for their $100 million investment. A lower percentage means a higher company valuation and more ownership retained by you and existing shareholders.</span></span></td><td class="points-col-header">Points</td></tr>
         <tr data-term="vc_equity_percentage" data-match="30_or_less"><td class="dot-cell"><span class="pos-dot"></span></td><td>30% or less</td><td>24</td></tr>
         <tr data-term="vc_equity_percentage" data-match="31_35"><td class="dot-cell"><span class="pos-dot"></span></td><td>31 - 35%</td><td>22</td></tr>
         <tr data-term="vc_equity_percentage" data-match="36_41"><td class="dot-cell"><span class="pos-dot"></span></td><td>36 - 41%</td><td>20</td></tr>
