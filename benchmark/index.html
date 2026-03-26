@@ -66,7 +66,7 @@
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
     .back-link {
       color: rgba(255,255,255,0.5);
@@ -74,14 +74,13 @@
       font-size: 13px;
       font-weight: 500;
       transition: color 0.2s;
+      margin-right: 15px;
     }
     .back-link:hover { color: rgba(255,255,255,0.8); }
 
-    #runBtn {
-      background: linear-gradient(135deg, #D09047 0%, #c07e35 100%);
-      color: white;
+    .btn {
       border: none;
-      padding: 10px 28px;
+      padding: 10px 24px;
       border-radius: 10px;
       font-size: 14px;
       font-weight: 700;
@@ -89,6 +88,10 @@
       cursor: pointer;
       transition: all 0.25s ease;
       letter-spacing: 0.03em;
+    }
+    #runBtn {
+      background: linear-gradient(135deg, #D09047 0%, #c07e35 100%);
+      color: white;
       box-shadow: 0 2px 8px rgba(208,144,71,0.25);
     }
     #runBtn:hover:not(:disabled) {
@@ -96,8 +99,17 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(208,144,71,0.35);
     }
-    #runBtn:disabled {
-      opacity: 0.6;
+    #resetBtn {
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    #resetBtn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .btn:disabled {
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
@@ -161,6 +173,13 @@
       color: #D09047;
       border-bottom: 1px solid rgba(9,36,48,0.08);
       text-align: center;
+    }
+    .col-header .win-stats {
+        display: block;
+        font-size: 10px;
+        color: #7D97A5;
+        margin-top: 2px;
+        letter-spacing: 0.05em;
     }
 
     .chat {
@@ -263,10 +282,6 @@
       color: #5a6a75;
     }
     .bubble tr:nth-child(even) td { background: #f8f9fa; }
-    .message.founder .bubble table { border-color: rgba(255,255,255,0.15); }
-    .message.founder .bubble th { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
-    .message.founder .bubble td { border-color: rgba(255,255,255,0.1); }
-    .message.founder .bubble tr:nth-child(even) td { background: rgba(255,255,255,0.04); }
 
     /* Typing indicator */
     .typing-dot {
@@ -334,8 +349,19 @@
       border-top: 2px solid rgba(125,151,165,0.3);
       padding-top: 6px;
     }
-    .score-card .total-row td:nth-child(2) { color: #D09047; }
-    .score-card .total-row td:nth-child(3) { color: #0d3040; }
+    .score-card .total-row td:nth-child(3) { color: #D09047; }
+    .score-card .total-row td:nth-child(4) { color: #0d3040; }
+
+    .score-card .stats-row td {
+        font-size: 10px;
+        color: #7D97A5;
+        border-bottom: none;
+        padding-top: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .score-card .stats-row b { color: #D09047; }
+
     .score-card .no-deal-val { color: #e05555; font-weight: 700; }
     .batna-pass { color: #2e7d32; }
     .batna-fail { color: #e05555; }
@@ -362,7 +388,8 @@
     </div>
     <div class="header-right">
       <a href="/" class="back-link">&larr; Back to game</a>
-      <button id="runBtn" onclick="startSimulation()">Run Simulation</button>
+      <button id="resetBtn" class="btn" onclick="resetStats()">Reset Stats</button>
+      <button id="runBtn" class="btn" onclick="startSimulation()">Run Simulation</button>
     </div>
   </header>
 
@@ -374,21 +401,21 @@
 
   <div class="columns">
     <div class="column" id="col-aggressive">
-      <div class="col-header">Aggressive</div>
+      <div class="col-header" id="header-aggressive">Aggressive <span class="win-stats">(0/0 wins)</span></div>
       <div class="round-indicator" id="round-aggressive">&mdash;</div>
       <div class="chat" id="chat-aggressive">
         <div class="empty-state">Waiting to start...</div>
       </div>
     </div>
     <div class="column" id="col-collaborative">
-      <div class="col-header">Collaborative</div>
+      <div class="col-header" id="header-collaborative">Collaborative <span class="win-stats">(0/0 wins)</span></div>
       <div class="round-indicator" id="round-collaborative">&mdash;</div>
       <div class="chat" id="chat-collaborative">
         <div class="empty-state">Waiting to start...</div>
       </div>
     </div>
     <div class="column" id="col-charming">
-      <div class="col-header">Charming</div>
+      <div class="col-header" id="header-charming">Charming <span class="win-stats">(0/0 wins)</span></div>
       <div class="round-indicator" id="round-charming">&mdash;</div>
       <div class="chat" id="chat-charming">
         <div class="empty-state">Waiting to start...</div>
@@ -398,10 +425,18 @@
 
   <script>
   const MAX_ROUNDS = 10;
+  const BATNA = 30;
   const { scoreFounderTerm, scoreVCTerm } = PACT_MAN_LOGIC;
 
   let timerInterval = null;
   let startTime = null;
+
+  // Global statistics state
+  let globalStats = {
+      aggressive: { wins: 0, total: 0, winRounds: [] },
+      collaborative: { wins: 0, total: 0, winRounds: [] },
+      charming: { wins: 0, total: 0, winRounds: [] }
+  };
 
   function defaultState() {
     return {
@@ -414,6 +449,51 @@
       },
       overall_status: 'negotiating',
     };
+  }
+
+  function resetStats() {
+      if (!confirm('Are you sure you want to clear all simulation statistics?')) return;
+      globalStats = {
+          aggressive: { wins: 0, total: 0, winRounds: [] },
+          collaborative: { wins: 0, total: 0, winRounds: [] },
+          charming: { wins: 0, total: 0, winRounds: [] }
+      };
+      updateUIHeaders();
+      document.querySelectorAll('.score-card').forEach(el => el.remove());
+      document.querySelectorAll('.chat').forEach(el => el.innerHTML = '<div class="empty-state">Stats reset. Ready for new run.</div>');
+  }
+
+  function updateUIHeaders() {
+      for (const [key, data] of Object.entries(globalStats)) {
+          const header = document.querySelector(`#header-${key} .win-stats`);
+          if (header) {
+              header.textContent = `(${data.wins}/${data.total} wins)`;
+          }
+      }
+  }
+
+  // -- Score Calculation --
+  function calculateScores(state) {
+    const termKeys = ['vc_equity_percentage', 'type_of_stock', 'vc_board_members', 'founder_vesting', 'ceo_replacement'];
+    let fTotal = 0, vTotal = 0;
+    let fNoDeal = false, vNoDeal = false;
+    let agreedCount = 0;
+
+    for (const key of termKeys) {
+      const t = state.terms[key];
+      if (t && t.status === 'tentatively_agreed' && t.agreed_value) {
+        agreedCount++;
+        const fs = scoreFounderTerm(key, t.agreed_value);
+        const vs = scoreVCTerm(key, t.agreed_value);
+
+        if (fs === 'no_deal') fNoDeal = true;
+        else if (typeof fs === 'number') fTotal += fs;
+
+        if (vs === 'no_deal') vNoDeal = true;
+        else if (typeof vs === 'number') vTotal += vs;
+      }
+    }
+    return { fTotal, vTotal, fNoDeal, vNoDeal, agreedCount };
   }
 
   // -- Rendering helpers --
@@ -507,7 +587,7 @@
 
   // -- Score card --
 
-  function showScoreCard(column, state, outcome) {
+  function showScoreCard(strategyKey, column, state, outcome, finalRound) {
     const labels = {
       vc_equity_percentage: 'Equity %',
       type_of_stock: 'Stock',
@@ -516,21 +596,14 @@
       ceo_replacement: 'CEO',
     };
 
-    let founderTotal = 0, vcTotal = 0;
-    let founderNoDeal = false, vcNoDeal = false;
-    let agreed = 0;
+    const { fTotal, vTotal, fNoDeal, vNoDeal, agreedCount } = calculateScores(state);
     const rows = [];
 
     for (const [key, label] of Object.entries(labels)) {
       const t = state.terms[key];
       if (t.status === 'tentatively_agreed' && t.agreed_value) {
-        agreed++;
         const fs = scoreFounderTerm(key, t.agreed_value);
         const vs = scoreVCTerm(key, t.agreed_value);
-        if (fs === 'no_deal') founderNoDeal = true;
-        else if (fs !== null) founderTotal += fs;
-        if (vs === 'no_deal') vcNoDeal = true;
-        else if (vs !== null) vcTotal += vs;
         const fsDisplay = fs === 'no_deal' ? '<span class="no-deal-val">ND</span>' : (fs !== null ? fs : '?');
         const vsDisplay = vs === 'no_deal' ? '<span class="no-deal-val">ND</span>' : (vs !== null ? vs : '?');
         const val = t.agreed_value.length > 12 ? t.agreed_value.slice(0, 12) + '...' : t.agreed_value;
@@ -540,22 +613,28 @@
       }
     }
 
-    const fResult = founderNoDeal ? 'ND' : founderTotal;
-    const vResult = vcNoDeal ? 'ND' : vcTotal;
-    const fBatna = founderNoDeal ? 'batna-fail' : (founderTotal >= 30 ? 'batna-pass' : 'batna-fail');
-    const vBatna = vcNoDeal ? 'batna-fail' : (vcTotal >= 30 ? 'batna-pass' : 'batna-fail');
+    const fResult = fNoDeal ? 'ND' : fTotal;
+    const vResult = vNoDeal ? 'ND' : vTotal;
+    const fBatna = fNoDeal ? 'batna-fail' : (fTotal >= BATNA ? 'batna-pass' : 'batna-fail');
+    const vBatna = vNoDeal ? 'batna-fail' : (vTotal >= BATNA ? 'batna-pass' : 'batna-fail');
 
     let headerClass, headerText;
     if (outcome === 'deal') {
       headerClass = 'deal-reached';
-      headerText = `Deal Reached (${agreed}/5 terms)`;
+      headerText = `Deal Reached (${agreedCount}/5 terms)`;
     } else if (outcome === 'max-rounds') {
       headerClass = 'max-rounds';
-      headerText = `Max Rounds (${agreed}/5 agreed)`;
+      headerText = `Max Rounds (${agreedCount}/5 agreed)`;
     } else {
       headerClass = 'no-deal';
       headerText = 'No Deal';
     }
+
+    // Stats calculation for display
+    const s = globalStats[strategyKey];
+    const avgRounds = s.winRounds.length > 0
+        ? (s.winRounds.reduce((a, b) => a + b, 0) / s.winRounds.length).toFixed(1)
+        : '—';
 
     const card = document.createElement('div');
     card.className = 'score-card';
@@ -567,8 +646,12 @@
         <tr class="total-row">
           <td>Total</td>
           <td></td>
-          <td class="${fBatna}">${fResult}${!founderNoDeal ? '/59' : ''}</td>
-          <td class="${vBatna}">${vResult}${!vcNoDeal ? '/54' : ''}</td>
+          <td class="${fBatna}">${fResult}/59</td>
+          <td class="${vBatna}">${vResult}/54</td>
+        </tr>
+        <tr class="stats-row">
+            <td colspan="2">Wins: <b>${s.wins}/${s.total}</b></td>
+            <td colspan="2">Avg: <b>${avgRounds} rounds</b></td>
         </tr>
       </table>
     `;
@@ -620,8 +703,10 @@
     let founderMessages = [{ role: 'user', content: intro }];
     let state = defaultState();
     let outcome = 'max-rounds';
+    let finalRound = 0;
 
     for (let round = 1; round <= MAX_ROUNDS; round++) {
+      finalRound = round;
       updateRound(strategyKey, round);
 
       // Founder responds
@@ -663,14 +748,28 @@
       }
 
       if (state.overall_status === 'deal_reached') {
-        outcome = 'deal';
-        break;
+        const scores = calculateScores(state);
+        if (!scores.fNoDeal && !scores.vNoDeal && scores.fTotal >= BATNA && scores.vTotal >= BATNA) {
+          outcome = 'deal';
+          break;
+        } else {
+          console.warn(`[${strategyKey}] AI tried to close deal prematurely. Scores: F=${scores.fTotal}, V=${scores.vTotal}. Continuing...`);
+          state.overall_status = 'negotiating';
+        }
       }
     }
 
-    showScoreCard(column, state, outcome);
+    // Update global statistics
+    globalStats[strategyKey].total++;
+    if (outcome === 'deal') {
+        globalStats[strategyKey].wins++;
+        globalStats[strategyKey].winRounds.push(finalRound);
+    }
+    updateUIHeaders(); // Update headers after stats are updated
+
+    showScoreCard(strategyKey, column, state, outcome, finalRound);
     document.getElementById(`round-${strategyKey}`).textContent =
-      outcome === 'deal' ? 'Complete' : `Done (${outcome === 'max-rounds' ? 'max rounds' : 'no deal'})`;
+      outcome === 'deal' ? `Complete (${finalRound} rounds)` : `Done (${outcome === 'max-rounds' ? 'max rounds' : 'no deal'})`;
 
     return { strategyKey, state, outcome };
   }
@@ -684,7 +783,9 @@
     running = true;
 
     const btn = document.getElementById('runBtn');
+    const resetBtn = document.getElementById('resetBtn');
     btn.disabled = true;
+    resetBtn.disabled = true;
     btn.textContent = 'Running...';
 
     const dot = document.getElementById('statusDot');
@@ -728,9 +829,13 @@
 
     stopTimer();
     btn.disabled = false;
+    resetBtn.disabled = false;
     btn.textContent = 'Run Again';
     running = false;
   }
+
+  // Initial update of headers on page load
+  updateUIHeaders();
   </script>
 </body>
 </html>
