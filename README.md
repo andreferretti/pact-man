@@ -15,7 +15,10 @@ An AI-powered negotiation game. You're an aerospace startup founder negotiating 
 ⚠️ Before running, create a `.env` file in the project root with your [OpenRouter](https://openrouter.ai/) API key (or rename the existing `.env.example` file to `.env` and fill in your key):
 ```
 OPENROUTER_API_KEY=your-key-here
+STATE_SECRET=any-random-string-here
 ```
+
+`STATE_SECRET` is used to HMAC-sign negotiation state so clients can't tamper with it. In local dev a fallback is used, but **set a strong secret in production** (e.g. `openssl rand -hex 32`).
 
 Once the API keys are set up, run:
 ```bash

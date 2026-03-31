@@ -1299,6 +1299,7 @@
   let conversationHistory = [];
   let sending = false;
   let negotiationState = null;
+  let negotiationStateSig = null;
   let judgeAbort = null;
   let selectedStrategy = 'collaborative';
 
@@ -1650,6 +1651,7 @@
     // Reset all state
     conversationHistory = [];
     negotiationState = null;
+    negotiationStateSig = null;
     sending = false;
     document.getElementById('chat').innerHTML = '';
     document.getElementById('userInput').disabled = false;
@@ -1800,7 +1802,7 @@
       const res = await fetch('/api/negotiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory, state: negotiationState, strategy: selectedStrategy }),
+        body: JSON.stringify({ messages: conversationHistory, state: negotiationState, stateSig: negotiationStateSig, strategy: selectedStrategy }),
       });
       const data = await res.json();
       hideTyping();
@@ -1826,7 +1828,7 @@
       fetch('/api/judge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory, state: negotiationState }),
+        body: JSON.stringify({ messages: conversationHistory, state: negotiationState, stateSig: negotiationStateSig }),
         signal: judgeAbort.signal,
       })
         .then(r => r.json())
@@ -1835,6 +1837,9 @@
           if (judgeData.state) {
             if (judgeData.state._judgeError) {
               console.error('%c[Judge FAILED]', 'color:#e05555;font-weight:bold', judgeData.state._judgeError);
+            }
+            if (judgeData.stateSig) {
+              negotiationStateSig = judgeData.stateSig;
             }
             updateTracker(judgeData.state);
           }

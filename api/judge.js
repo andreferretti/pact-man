@@ -1,5 +1,6 @@
 const { defaultState } = require('./negotiate');
 const { fetchWithRetry } = require('./_retry');
+const { signState, verifyState } = require('./_state-signing');
 
 const JUDGE_SYSTEM_PROMPT = `You are a negotiation analyst observing a Series A funding negotiation between a startup founder and a VC investor. Your job is to analyze the conversation and report the current state of each negotiation term by calling the update_negotiation_state tool.
 
@@ -155,7 +156,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { messages, state: clientState } = req.body || {};
+  const { messages, state: clientState, stateSig } = req.body || {};
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing messages' });
@@ -166,11 +167,21 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'OPENROUTER_API_KEY not configured' });
   }
 
-  const currentState = clientState || defaultState();
+  // First turn: no state yet, use default. Otherwise verify signature.
+  let currentState;
+  if (!clientState) {
+    currentState = defaultState();
+  } else if (!verifyState(clientState, stateSig)) {
+    return res.status(400).json({ error: 'Invalid state signature — state may have been tampered with' });
+  } else {
+    currentState = clientState;
+  }
 
   try {
     const newState = await callJudge(apiKey, messages, currentState);
-    res.status(200).json({ state: newState });
+    newState.turn = (currentState.turn || 0) + 1;
+    const newSig = signState(newState);
+    res.status(200).json({ state: newState, stateSig: newSig });
   } catch (err) {
     console.error('judge error:', err);
     res.status(500).json({ error: 'Internal server error' });

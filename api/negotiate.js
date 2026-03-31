@@ -1,5 +1,6 @@
 const { scoreVCTerm } = require('../game-logic');
 const { fetchWithRetry } = require('./_retry');
+const { verifyState } = require('./_state-signing');
 
 const BASE_VC_PROMPT = `You are playing the role of a VC INVESTOR negotiating a Series A funding deal with a aerospace startup founder. You want the best deal possible.
 
@@ -199,7 +200,7 @@ async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { messages, state: clientState, strategy: reqStrategy, noReasoning } = req.body || {};
+  const { messages, state: clientState, stateSig, strategy: reqStrategy, noReasoning } = req.body || {};
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing messages' });
@@ -210,7 +211,15 @@ async function handler(req, res) {
     return res.status(500).json({ error: 'OPENROUTER_API_KEY not configured' });
   }
 
-  const currentState = clientState || defaultState();
+  // First turn: no state yet, use default. Otherwise verify signature.
+  let currentState;
+  if (!clientState) {
+    currentState = defaultState();
+  } else if (!verifyState(clientState, stateSig)) {
+    return res.status(400).json({ error: 'Invalid state signature — state may have been tampered with' });
+  } else {
+    currentState = clientState;
+  }
   const strategy = STRATEGIES[reqStrategy] ? reqStrategy : DEFAULT_STRATEGY;
 
   try {
