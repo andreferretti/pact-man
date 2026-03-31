@@ -27,6 +27,13 @@ npm run dev
 
 That's it! The project opens automatically at `http://localhost:3000`.
 
+To run unit tests:
+```bash
+npm test
+```
+
+Tests run on GitHub Actions automatically on push/PR to main.
+
 ## Scoring
 
 Each one of the 5 negotiation terms has options worth different points to each side. Both parties have a BATNA (walk-away threshold) of 30 points — if your final score is below that, you're better off with no deal.
